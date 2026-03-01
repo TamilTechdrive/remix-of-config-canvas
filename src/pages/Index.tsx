@@ -15,7 +15,7 @@ import ConfigNode from '@/components/editor/ConfigNode';
 import NodePalette from '@/components/editor/NodePalette';
 import PropertiesPanel from '@/components/editor/PropertiesPanel';
 import EditorToolbar from '@/components/editor/EditorToolbar';
-import NodeInsightPanel from '@/components/editor/NodeInsightPanel';
+import NodeActionsPanel from '@/components/editor/NodeActionsPanel';
 import { useConfigEditor } from '@/hooks/useConfigEditor';
 import type { ConfigNodeData, ConfigNodeType } from '@/types/configTypes';
 import { SAMPLE_CONFIG } from '@/data/sampleConfig';
@@ -32,6 +32,7 @@ const EditorCanvas = () => {
     addNode, autoAddChild, updateNodeData, updateNodeProperty,
     deleteNode, setSelectedNodeId,
     exportConfig, importConfig, loadSampleData, autoResolveAll,
+    addUserRule, removeUserRule, updateNodeMeta,
   } = useConfigEditor();
 
   const [showInsights, setShowInsights] = useState(false);
@@ -122,6 +123,14 @@ const EditorCanvas = () => {
         <span className="text-muted-foreground ml-auto">{nodes.length} nodes · {edges.length} edges</span>
       </div>
 
+      <EditorToolbar
+        onExport={exportConfig}
+        onImport={importConfig}
+        onLoadSample={loadSampleData}
+        nodeCount={nodes.length}
+        edgeCount={edges.length}
+      />
+
       <div className="flex-1 relative">
         <ReactFlow
           nodes={nodes}
@@ -140,13 +149,6 @@ const EditorCanvas = () => {
           defaultEdgeOptions={{ type: 'smoothstep', animated: true }}
           proOptions={{ hideAttribution: true }}
         >
-          <EditorToolbar
-            onExport={exportConfig}
-            onImport={importConfig}
-            onLoadSample={loadSampleData}
-            nodeCount={nodes.length}
-            edgeCount={edges.length}
-          />
           <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="hsl(220 14% 18%)" />
           <Controls />
           <MiniMap
@@ -165,14 +167,14 @@ const EditorCanvas = () => {
         </ReactFlow>
 
         {/* Left palette */}
-        <div className="absolute left-0 top-11 bottom-0 w-56 bg-surface-overlay border-r border-border overflow-y-auto z-10">
+        <div className="absolute left-0 top-0 bottom-0 w-56 bg-surface-overlay border-r border-border overflow-y-auto z-10">
           <NodePalette />
         </div>
 
-        {/* Right panel: Insights */}
+        {/* Right panel: Actions */}
         {selectedNode && showInsights && (
           <div className="absolute right-0 top-0 bottom-0 z-10 flex">
-            <NodeInsightPanel
+            <NodeActionsPanel
               nodeId={selectedNodeId!}
               nodes={nodes}
               edges={edges}
@@ -182,6 +184,9 @@ const EditorCanvas = () => {
               onFixIssue={onFixIssue}
               onAutoResolveAll={autoResolveAll}
               onToggleIncluded={onToggleIncluded}
+              onAddUserRule={addUserRule}
+              onRemoveUserRule={removeUserRule}
+              onUpdateNodeMeta={updateNodeMeta}
             />
           </div>
         )}

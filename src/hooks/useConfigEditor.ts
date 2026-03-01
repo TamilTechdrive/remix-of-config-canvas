@@ -154,6 +154,49 @@ export const useConfigEditor = () => {
     );
   }, []);
 
+  const addUserRule = useCallback((nodeId: string, rule: { id: string; type: string; targetNodeId: string; targetLabel: string; reason: string }) => {
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id !== nodeId) return n;
+        const data = n.data as unknown as ConfigNodeData;
+        const existing = (data.properties?.userRules as unknown as any[]) || [];
+        return {
+          ...n,
+          data: { ...n.data, properties: { ...data.properties, userRules: [...existing, rule] } },
+        };
+      })
+    );
+    toast.success('Rule Added', { description: `${rule.type} → ${rule.targetLabel}` });
+  }, []);
+
+  const removeUserRule = useCallback((nodeId: string, ruleId: string) => {
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id !== nodeId) return n;
+        const data = n.data as unknown as ConfigNodeData;
+        const existing = (data.properties?.userRules as unknown as any[]) || [];
+        return {
+          ...n,
+          data: { ...n.data, properties: { ...data.properties, userRules: existing.filter((r: any) => r.id !== ruleId) } },
+        };
+      })
+    );
+    toast.info('Rule Removed');
+  }, []);
+
+  const updateNodeMeta = useCallback((nodeId: string, meta: Record<string, unknown>) => {
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id !== nodeId) return n;
+        const data = n.data as unknown as ConfigNodeData;
+        return {
+          ...n,
+          data: { ...n.data, properties: { ...data.properties, ...meta } },
+        };
+      })
+    );
+  }, []);
+
   const deleteNode = useCallback((nodeId: string) => {
     setNodes((nds) => nds.filter((n) => n.id !== nodeId));
     setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
@@ -369,6 +412,9 @@ th{color:#4dd68e;font-size:.8rem;text-transform:uppercase}
     importConfig,
     loadSampleData,
     autoResolveAll,
+    addUserRule,
+    removeUserRule,
+    updateNodeMeta,
   };
 };
 

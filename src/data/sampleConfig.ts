@@ -15,6 +15,12 @@ export interface RawRule {
   requires?: string[];
   conflicts?: string[];
   suggestion?: string;
+  impact_level?: 'low' | 'medium' | 'high' | 'critical';
+  priority?: number;
+  tags?: string[];
+  must_enable?: boolean;
+  must_disable?: boolean;
+  duplicate_of?: string;
 }
 
 export interface RawState {
@@ -69,10 +75,10 @@ export const SAMPLE_CONFIG: RawConfig = {
         },
       ],
       rules: [
-        { option_key: "h265", requires: ["h264"], suggestion: "H.265 needs H.264 as fallback codec" },
-        { option_key: "av1", requires: ["hw_accel"], suggestion: "AV1 requires hardware acceleration for real-time decode" },
-        { option_key: "gpu_decode", requires: ["hw_accel"], conflicts: ["sw_fallback"], suggestion: "GPU decode conflicts with software-only mode" },
-        { option_key: "vp9", requires: ["h264"], conflicts: ["av1"], suggestion: "VP9 and AV1 are competing formats — pick one" },
+        { option_key: "h265", requires: ["h264"], suggestion: "H.265 needs H.264 as fallback codec", impact_level: "high", priority: 8, tags: ["codec", "next-gen"] },
+        { option_key: "av1", requires: ["hw_accel"], suggestion: "AV1 requires hardware acceleration for real-time decode", impact_level: "critical", priority: 9, tags: ["codec", "bleeding-edge"], must_enable: false },
+        { option_key: "gpu_decode", requires: ["hw_accel"], conflicts: ["sw_fallback"], suggestion: "GPU decode conflicts with software-only mode", impact_level: "high", priority: 7, tags: ["hardware"] },
+        { option_key: "vp9", requires: ["h264"], conflicts: ["av1"], suggestion: "VP9 and AV1 are competing formats — pick one", impact_level: "medium", priority: 5, tags: ["codec", "google"] },
       ],
       states: {
         idle: { INIT_DECODER: "decoding" },
@@ -109,10 +115,10 @@ export const SAMPLE_CONFIG: RawConfig = {
         },
       ],
       rules: [
-        { option_key: "hdr10", requires: ["res_4k"], suggestion: "HDR10 requires at least 4K resolution for proper mastering" },
-        { option_key: "dolby_vision", requires: ["hdr10", "res_4k"], conflicts: ["hlg"], suggestion: "Dolby Vision requires HDR10 base layer and conflicts with HLG" },
-        { option_key: "res_8k", requires: ["res_4k"], suggestion: "8K pipeline builds on 4K infrastructure" },
-        { option_key: "hlg", requires: ["res_1080p"], conflicts: ["dolby_vision"], suggestion: "HLG is a broadcast standard, conflicts with Dolby Vision" },
+        { option_key: "hdr10", requires: ["res_4k"], suggestion: "HDR10 requires at least 4K resolution for proper mastering", impact_level: "high", priority: 8, tags: ["hdr", "quality"] },
+        { option_key: "dolby_vision", requires: ["hdr10", "res_4k"], conflicts: ["hlg"], suggestion: "Dolby Vision requires HDR10 base layer and conflicts with HLG", impact_level: "critical", priority: 10, tags: ["premium", "hdr"], must_enable: true },
+        { option_key: "res_8k", requires: ["res_4k"], suggestion: "8K pipeline builds on 4K infrastructure", impact_level: "critical", priority: 3, tags: ["future-proof"] },
+        { option_key: "hlg", requires: ["res_1080p"], conflicts: ["dolby_vision"], suggestion: "HLG is a broadcast standard, conflicts with Dolby Vision", impact_level: "medium", priority: 4, tags: ["broadcast"] },
       ],
       states: {
         idle: { START_OUTPUT: "rendering" },
@@ -148,10 +154,10 @@ export const SAMPLE_CONFIG: RawConfig = {
         },
       ],
       rules: [
-        { option_key: "atmos", requires: ["ac3", "surround_51"], suggestion: "Dolby Atmos requires AC-3 codec and 5.1 base channel layout" },
-        { option_key: "spatial_audio", requires: ["surround_51"], conflicts: ["atmos"], suggestion: "Apple Spatial Audio conflicts with Dolby Atmos — choose one spatial format" },
-        { option_key: "flac", conflicts: ["opus"], suggestion: "FLAC and Opus serve different purposes — lossless vs. low-latency" },
-        { option_key: "surround_51", requires: ["aac"], suggestion: "5.1 surround needs AAC as fallback for stereo downmix" },
+        { option_key: "atmos", requires: ["ac3", "surround_51"], suggestion: "Dolby Atmos requires AC-3 codec and 5.1 base channel layout", impact_level: "critical", priority: 9, tags: ["premium", "spatial"] },
+        { option_key: "spatial_audio", requires: ["surround_51"], conflicts: ["atmos"], suggestion: "Apple Spatial Audio conflicts with Dolby Atmos — choose one spatial format", impact_level: "high", priority: 7, tags: ["apple", "spatial"], duplicate_of: "atmos" },
+        { option_key: "flac", conflicts: ["opus"], suggestion: "FLAC and Opus serve different purposes — lossless vs. low-latency", impact_level: "low", priority: 3, tags: ["lossless"] },
+        { option_key: "surround_51", requires: ["aac"], suggestion: "5.1 surround needs AAC as fallback for stereo downmix", impact_level: "medium", priority: 6, tags: ["surround"] },
       ],
       states: {
         idle: { START_AUDIO: "playing" },
