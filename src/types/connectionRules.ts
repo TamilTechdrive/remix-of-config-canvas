@@ -15,11 +15,22 @@ export interface DependencySuggestion {
   required: boolean;
 }
 
-// Valid parent→child connections
+// Recommended parent→child connections (advisory, not enforced)
 export const CONNECTION_RULES: ConnectionRule[] = [
   { id: 'c_m', sourceType: 'container', targetType: 'module', allowed: true, reason: 'Containers hold modules' },
   { id: 'm_g', sourceType: 'module', targetType: 'group', allowed: true, reason: 'Modules hold groups' },
   { id: 'g_o', sourceType: 'group', targetType: 'option', allowed: true, reason: 'Groups hold options' },
+  // Cross-level connections are allowed but warned
+  { id: 'c_g', sourceType: 'container', targetType: 'group', allowed: true, reason: 'Direct container→group (skips module)' },
+  { id: 'c_o', sourceType: 'container', targetType: 'option', allowed: true, reason: 'Direct container→option (skips hierarchy)' },
+  { id: 'm_o', sourceType: 'module', targetType: 'option', allowed: true, reason: 'Direct module→option (skips group)' },
+  // Cross-type connections
+  { id: 'o_o', sourceType: 'option', targetType: 'option', allowed: true, reason: 'Option dependency link' },
+  { id: 'o_g', sourceType: 'option', targetType: 'group', allowed: true, reason: 'Option→group reference' },
+  { id: 'o_m', sourceType: 'option', targetType: 'module', allowed: true, reason: 'Option→module reference' },
+  { id: 'g_m', sourceType: 'group', targetType: 'module', allowed: true, reason: 'Group→module cross-reference' },
+  { id: 'g_g', sourceType: 'group', targetType: 'group', allowed: true, reason: 'Group→group link' },
+  { id: 'm_m', sourceType: 'module', targetType: 'module', allowed: true, reason: 'Module→module dependency' },
 ];
 
 // What each node type needs
@@ -37,33 +48,58 @@ export const DEPENDENCY_RULES: Record<ConfigNodeType, DependencySuggestion[]> = 
   option: [],
 };
 
+export type ConnectionWarningLevel = 'ok' | 'info' | 'warning';
+
+export interface ConnectionValidation {
+  valid: boolean;
+  message: string;
+  warningLevel: ConnectionWarningLevel;
+}
+
+// Standard hierarchy order
+const HIERARCHY_ORDER: Record<ConfigNodeType, number> = {
+  container: 0,
+  module: 1,
+  group: 2,
+  option: 3,
+};
+
 export const validateConnection = (
   sourceType: ConfigNodeType,
   targetType: ConfigNodeType
-): { valid: boolean; message: string } => {
-  const rule = CONNECTION_RULES.find(
-    (r) => r.sourceType === sourceType && r.targetType === targetType
-  );
-
-  if (rule?.allowed) {
-    return { valid: true, message: rule.reason };
-  }
-
-  // Check reverse (child→parent is wrong direction)
-  const reverse = CONNECTION_RULES.find(
-    (r) => r.sourceType === targetType && r.targetType === sourceType
-  );
-  if (reverse) {
-    return { valid: false, message: `Wrong direction: connect ${targetType} → ${sourceType} instead` };
-  }
-
-  // Same type
+): ConnectionValidation => {
+  // Self-loop is not allowed
   if (sourceType === targetType) {
-    return { valid: false, message: `Cannot connect ${sourceType} to ${sourceType}` };
+    return {
+      valid: true,
+      message: `${sourceType}→${targetType} peer link`,
+      warningLevel: 'info',
+    };
   }
 
-  // Skip levels
-  return { valid: false, message: `Invalid: ${sourceType} cannot directly connect to ${targetType}. Follow hierarchy: Container → Module → Group → Option` };
+  const srcOrder = HIERARCHY_ORDER[sourceType];
+  const tgtOrder = HIERARCHY_ORDER[targetType];
+
+  // Standard top-down and exactly one level
+  if (tgtOrder === srcOrder + 1) {
+    return { valid: true, message: `Standard: ${sourceType} → ${targetType}`, warningLevel: 'ok' };
+  }
+
+  // Top-down but skipping levels
+  if (tgtOrder > srcOrder) {
+    return {
+      valid: true,
+      message: `Cross-level: ${sourceType} → ${targetType} (skips hierarchy)`,
+      warningLevel: 'info',
+    };
+  }
+
+  // Bottom-up or reverse
+  return {
+    valid: true,
+    message: `Reverse link: ${sourceType} → ${targetType} (non-standard direction)`,
+    warningLevel: 'warning',
+  };
 };
 
 export const getUniquenessViolation = (
@@ -71,15 +107,14 @@ export const getUniquenessViolation = (
   targetId: string,
   existingEdges: { source: string; target: string }[]
 ): string | null => {
+  // Don't connect to self
+  if (sourceId === targetId) return 'Cannot connect a node to itself';
+
   const duplicate = existingEdges.find(
     (e) => e.source === sourceId && e.target === targetId
   );
   if (duplicate) return 'This connection already exists';
 
-  const targetAlreadyConnected = existingEdges.find(
-    (e) => e.target === targetId
-  );
-  if (targetAlreadyConnected) return 'This node already has a parent connection';
-
+  // Allow multiple parents now - rule engine will flag if it's a problem
   return null;
 };

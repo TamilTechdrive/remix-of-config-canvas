@@ -1,10 +1,11 @@
-import { Download, Upload, ZoomIn, ZoomOut, Maximize2, Database } from 'lucide-react';
+import { Upload, ZoomIn, ZoomOut, Maximize2, Database } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useReactFlow } from '@xyflow/react';
+import ExportDialog from './ExportDialog';
 
 interface EditorToolbarProps {
-  onExport: () => void;
+  onExport: (format: 'json' | 'xml' | 'html' | 'opt') => void;
   onImport: () => void;
   onLoadSample: () => void;
   nodeCount: number;
@@ -42,10 +43,7 @@ const EditorToolbar = ({ onExport, onImport, onLoadSample, nodeCount, edgeCount 
           <Upload className="w-3.5 h-3.5" />
           Import
         </Button>
-        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5" onClick={onExport}>
-          <Download className="w-3.5 h-3.5" />
-          Export
-        </Button>
+        <ExportDialog onExport={onExport} />
 
         <Separator orientation="vertical" className="h-5 mx-1" />
 

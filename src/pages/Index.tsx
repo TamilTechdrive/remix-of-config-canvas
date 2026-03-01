@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ReactFlow,
   Background,
@@ -21,34 +21,21 @@ import type { ConfigNodeData, ConfigNodeType } from '@/types/configTypes';
 import { SAMPLE_CONFIG } from '@/data/sampleConfig';
 import { analyzeFullGraph } from '@/engine/ruleEngine';
 import type { RuleIssue } from '@/engine/ruleEngine';
-import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Sparkles } from 'lucide-react';
 
-const nodeTypes: NodeTypes = {
-  configNode: ConfigNode,
-};
+const nodeTypes: NodeTypes = { configNode: ConfigNode };
 
 const EditorCanvas = () => {
   const {
-    nodes,
-    edges,
-    selectedNodeId,
-    selectedNode,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-    addNode,
-    autoAddChild,
-    updateNodeData,
-    deleteNode,
-    setSelectedNodeId,
-    exportConfig,
-    importConfig,
-    loadSampleData,
+    nodes, edges, selectedNodeId, selectedNode,
+    onNodesChange, onEdgesChange, onConnect,
+    addNode, autoAddChild, updateNodeData, updateNodeProperty,
+    deleteNode, setSelectedNodeId,
+    exportConfig, importConfig, loadSampleData, autoResolveAll,
   } = useConfigEditor();
 
   const [showInsights, setShowInsights] = useState(false);
-  const { screenToFlowPosition, fitView, setCenter } = useReactFlow();
+  const { screenToFlowPosition, setCenter } = useReactFlow();
 
   const graphAnalysis = useMemo(
     () => analyzeFullGraph(nodes, edges, SAMPLE_CONFIG),
@@ -90,6 +77,7 @@ const EditorCanvas = () => {
       if (node) {
         setCenter(node.position.x + 100, node.position.y + 50, { zoom: 1.5, duration: 500 });
         setSelectedNodeId(nodeId);
+        setShowInsights(true);
       }
     },
     [nodes, setCenter, setSelectedNodeId]
@@ -99,12 +87,23 @@ const EditorCanvas = () => {
     (issue: RuleIssue) => {
       if (!issue.fix) return;
       if (issue.fix.action === 'add_option') {
-        updateNodeData(issue.fix.payload.nodeId, { included: true } as any);
+        updateNodeProperty(issue.fix.payload.nodeId, 'included', true);
       } else if (issue.fix.action === 'remove_option') {
-        updateNodeData(issue.fix.payload.nodeId, { included: false } as any);
+        updateNodeProperty(issue.fix.payload.nodeId, 'included', false);
       }
     },
-    [updateNodeData]
+    [updateNodeProperty]
+  );
+
+  const onToggleIncluded = useCallback(
+    (nodeId: string) => {
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) return;
+      const data = node.data as unknown as ConfigNodeData;
+      const current = data.properties?.included === true;
+      updateNodeProperty(nodeId, 'included', !current);
+    },
+    [nodes, updateNodeProperty]
   );
 
   return (
@@ -170,10 +169,9 @@ const EditorCanvas = () => {
           <NodePalette />
         </div>
 
-        {/* Right panel: Insights or Properties */}
+        {/* Right panel: Insights */}
         {selectedNode && showInsights && (
           <div className="absolute right-0 top-0 bottom-0 z-10 flex">
-            {/* Insight Panel */}
             <NodeInsightPanel
               nodeId={selectedNodeId!}
               nodes={nodes}
@@ -182,6 +180,8 @@ const EditorCanvas = () => {
               onClose={() => setShowInsights(false)}
               onFocusNode={onFocusNode}
               onFixIssue={onFixIssue}
+              onAutoResolveAll={autoResolveAll}
+              onToggleIncluded={onToggleIncluded}
             />
           </div>
         )}
