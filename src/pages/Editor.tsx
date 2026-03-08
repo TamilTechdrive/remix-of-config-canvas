@@ -22,7 +22,7 @@ import type { ConfigNodeData, ConfigNodeType } from '@/types/configTypes';
 import { SAMPLE_CONFIG } from '@/data/sampleConfig';
 import { analyzeFullGraph } from '@/engine/ruleEngine';
 import type { RuleIssue } from '@/engine/ruleEngine';
-import { AlertCircle, Sparkles, Save, CheckCircle2, Loader2 } from 'lucide-react';
+import { AlertCircle, Sparkles, Save, CheckCircle2, Loader2, Power } from 'lucide-react';
 import { toast } from 'sonner';
 
 const nodeTypes: NodeTypes = { configNode: ConfigNode };
