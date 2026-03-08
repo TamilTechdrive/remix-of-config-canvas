@@ -267,7 +267,7 @@ const EditorCanvas = () => {
           proOptions={{ hideAttribution: true }}
           edgesReconnectable
         >
-          <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="hsl(222 14% 22%)" />
+          <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="hsl(218 16% 82%)" />
           <Controls />
           <MiniMap
             nodeColor={(node) => {
