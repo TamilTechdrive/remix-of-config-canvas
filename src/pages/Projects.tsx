@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, FolderOpen, Copy, Trash2, Pencil, Search,
-  Archive, Tag, Clock, Package, Tv,
+  Archive, Tag, Clock, Package, Tv, FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,10 +20,15 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem,
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useProjectStore } from '@/hooks/useProjectStore';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
 import type { Project } from '@/types/projectTypes';
 import { PROJECT_STATUS_META } from '@/types/projectTypes';
+import { SAMPLE_PROJECTS, type SampleProject } from '@/data/sampleProjects';
 
 const Projects = () => {
   const navigate = useNavigate();
@@ -38,6 +43,18 @@ const Projects = () => {
   const [formName, setFormName] = useState('');
   const [formDesc, setFormDesc] = useState('');
   const [formTags, setFormTags] = useState('');
+  const [sampleOpen, setSampleOpen] = useState(false);
+  const [selectedSample, setSelectedSample] = useState<SampleProject | null>(null);
+
+  const sampleCategories = useMemo(() => {
+    const cats = new Map<string, SampleProject[]>();
+    SAMPLE_PROJECTS.forEach(s => {
+      const list = cats.get(s.category) || [];
+      list.push(s);
+      cats.set(s.category, list);
+    });
+    return cats;
+  }, []);
 
   const filtered = store.projects.filter(p => {
     if (statusFilter !== 'all' && p.status !== statusFilter) return false;
@@ -49,7 +66,23 @@ const Projects = () => {
     setFormName('');
     setFormDesc('');
     setFormTags('');
+    setSelectedSample(null);
     setCreateOpen(true);
+  };
+
+  const applySample = (sample: SampleProject) => {
+    setSelectedSample(sample);
+    setFormName(sample.name);
+    setFormDesc(sample.description);
+    setFormTags(sample.tags.join(', '));
+    setSampleOpen(false);
+  };
+
+  const clearSample = () => {
+    setSelectedSample(null);
+    setFormName('');
+    setFormDesc('');
+    setFormTags('');
   };
 
   const openEdit = (p: Project) => {
@@ -256,6 +289,52 @@ const Projects = () => {
             <DialogDescription>Create a new STB configuration project</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
+            <div>
+              <Label>Start from Template</Label>
+              <Popover open={sampleOpen} onOpenChange={setSampleOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full mt-1 justify-between text-sm font-normal">
+                    {selectedSample ? (
+                      <span className="flex items-center gap-2">
+                        <FileText className="w-3.5 h-3.5 text-primary" />
+                        {selectedSample.name}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">Select a sample project...</span>
+                    )}
+                    <Search className="w-3.5 h-3.5 text-muted-foreground" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search templates..." />
+                    <CommandList>
+                      <CommandEmpty>No templates found.</CommandEmpty>
+                      {Array.from(sampleCategories.entries()).map(([category, samples]) => (
+                        <CommandGroup key={category} heading={category}>
+                          {samples.map(sample => (
+                            <CommandItem
+                              key={sample.id}
+                              value={`${sample.name} ${sample.category} ${sample.tags.join(' ')}`}
+                              onSelect={() => applySample(sample)}
+                              className="flex flex-col items-start gap-0.5 py-2"
+                            >
+                              <span className="text-sm font-medium">{sample.name}</span>
+                              <span className="text-xs text-muted-foreground line-clamp-1">{sample.description}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              {selectedSample && (
+                <Button variant="ghost" size="sm" onClick={clearSample} className="mt-1 text-xs h-6 text-muted-foreground">
+                  Clear template
+                </Button>
+              )}
+            </div>
             <div>
               <Label>Project Name</Label>
               <Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. STB Platform 2026" className="mt-1" />
