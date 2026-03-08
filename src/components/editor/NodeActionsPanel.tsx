@@ -189,7 +189,7 @@ const NodeActionsPanel = ({
         )}
       </div>
 
-      <Tabs defaultValue="actions" className="flex-1 flex flex-col">
+      <Tabs defaultValue="actions" className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <TabsList className="mx-4 mt-2 bg-card border border-border">
           <TabsTrigger value="actions" className="text-xs gap-1">
             <Wand2 className="w-3 h-3" />
@@ -215,7 +215,7 @@ const NodeActionsPanel = ({
           </TabsTrigger>
         </TabsList>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 min-h-0">
           {/* Actions Tab - manual rule creation */}
           <TabsContent value="actions" className="p-4 space-y-4 mt-0">
             <div className="bg-accent/5 border border-accent/20 rounded-lg p-3 text-xs space-y-1">

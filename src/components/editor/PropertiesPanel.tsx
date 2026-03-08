@@ -154,7 +154,7 @@ const PropertiesPanel = ({ nodeId, data, onUpdate, onClose, onDelete, onAutoAdd,
 
   return (
     <TooltipProvider>
-      <div className="w-80 bg-surface-overlay border-l border-border h-full flex flex-col">
+      <div className="w-80 bg-surface-overlay border-l border-border h-full flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
@@ -185,7 +185,7 @@ const PropertiesPanel = ({ nodeId, data, onUpdate, onClose, onDelete, onAutoAdd,
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 min-h-0">
           <div className="p-4 space-y-1">
             {/* ── BASIC INFO ── */}
             <CollapsibleSection
