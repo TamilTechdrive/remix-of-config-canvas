@@ -124,7 +124,7 @@
 }
 
 .react-flow__background {
-  background-color: hsl(218 20% 96%) !important;
+  background-color: hsl(var(--background)) !important;
 }
 
 .react-flow__minimap {
