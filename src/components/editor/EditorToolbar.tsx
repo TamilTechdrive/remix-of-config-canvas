@@ -16,7 +16,7 @@ interface EditorToolbarProps {
   onCloudLoad: (configData: Record<string, unknown>) => void;
 }
 
-const EditorToolbar = ({ onExport, onImport, onLoadSample, nodeCount, edgeCount, onCloudSave, onCloudLoad }: EditorToolbarProps) => {
+const EditorToolbar = ({ onExport, onImport, onLoadSample, onCompare, nodeCount, edgeCount, onCloudSave, onCloudLoad }: EditorToolbarProps) => {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
 
   return (
