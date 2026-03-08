@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConfigStorage } from '@/hooks/useConfigStorage';
-import { Save, FolderOpen, Trash2, Cloud, CloudOff, Lock, X, LogOut, User, ChevronDown } from 'lucide-react';
+import { Save, FolderOpen, Trash2, Cloud, CloudOff, Lock, X, LogOut, User, ChevronDown, Shield } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface CloudToolbarProps {
@@ -11,6 +12,7 @@ interface CloudToolbarProps {
 
 const CloudToolbar = ({ onSave, onLoad }: CloudToolbarProps) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const { savedConfigs, isLoading, currentConfigId, fetchConfigs, saveConfig, loadConfig, deleteConfig } = useConfigStorage();
   const [showLoadDialog, setShowLoadDialog] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -100,6 +102,21 @@ const CloudToolbar = ({ onSave, onLoad }: CloudToolbarProps) => {
                     ))}
                   </div>
                 </div>
+                <button
+                  onClick={() => { setShowUserMenu(false); navigate('/profile'); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-accent/50 transition-colors"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  Profile
+                </button>
+                <button
+                  onClick={() => { setShowUserMenu(false); navigate('/admin'); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-accent/50 transition-colors"
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  Admin Panel
+                </button>
+                <div className="border-t border-border my-1" />
                 <button
                   onClick={() => { setShowUserMenu(false); logout(); }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs text-destructive hover:bg-destructive/10 transition-colors"
