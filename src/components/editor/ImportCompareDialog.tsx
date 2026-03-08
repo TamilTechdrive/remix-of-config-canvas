@@ -182,8 +182,8 @@ const ImportCompareDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) handleReset(); onOpenChange(v); }}>
-      <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[85vh] !grid-rows-[auto_1fr_auto] overflow-hidden">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <GitCompare className="w-5 h-5 text-primary" />
             Import & Compare Configuration
@@ -193,210 +193,209 @@ const ImportCompareDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Source Picker */}
-        <div className="space-y-3 border border-border rounded-lg p-4 bg-muted/30 shrink-0">
-          <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Source Configuration</p>
-          <div className="grid grid-cols-2 gap-3">
-            {/* Project */}
-            <div>
-              <label className="text-[10px] text-muted-foreground uppercase mb-1 block">Project</label>
-              <Select value={sourceProjectId} onValueChange={v => { setSourceProjectId(v); setSourceModelId(''); setSourceBuildId(''); setSourceModuleId(''); setCompared(false); }}>
-                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select project..." /></SelectTrigger>
-                <SelectContent>
-                  {store.projects.map(p => (
-                    <SelectItem key={p.id} value={p.id}>
-                      <span className="flex items-center gap-1.5"><Package className="w-3 h-3" /> {p.name}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {/* STB Model */}
-            <div>
-              <label className="text-[10px] text-muted-foreground uppercase mb-1 block">STB Model</label>
-              <Select value={sourceModelId} onValueChange={v => { setSourceModelId(v); setSourceBuildId(''); setSourceModuleId(''); setCompared(false); }} disabled={!sourceProject}>
-                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select model..." /></SelectTrigger>
-                <SelectContent>
-                  {sourceProject?.stbModels.map(m => (
-                    <SelectItem key={m.id} value={m.id}>
-                      <span className="flex items-center gap-1.5"><Tv className="w-3 h-3" /> {m.name}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {/* Build */}
-            <div>
-              <label className="text-[10px] text-muted-foreground uppercase mb-1 block">Build</label>
-              <Select value={sourceBuildId} onValueChange={v => { setSourceBuildId(v); setSourceModuleId(''); setCompared(false); }} disabled={!sourceModel}>
-                <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select build..." /></SelectTrigger>
-                <SelectContent>
-                  {sourceModel?.builds.map(b => (
-                    <SelectItem key={b.id} value={b.id}>
-                      <span className="flex items-center gap-1.5"><GitBranch className="w-3 h-3" /> {b.name} <span className="font-mono text-muted-foreground">v{b.version}</span></span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {/* Module (only in module mode) */}
-            {mode === 'module' && (
-              <div>
-                <label className="text-[10px] text-muted-foreground uppercase mb-1 block">Module</label>
-                <Select value={sourceModuleId} onValueChange={v => { setSourceModuleId(v); setCompared(false); }} disabled={!sourceBuild}>
-                  <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select module..." /></SelectTrigger>
-                  <SelectContent>
-                    {sourceBuild?.modules.map(m => {
-                      const meta = MODULE_TYPE_META[m.type];
-                      return (
-                        <SelectItem key={m.id} value={m.id}>
-                          <span className="flex items-center gap-1.5">{meta.icon} {m.name}</span>
+        <ScrollArea className="overflow-y-auto pr-2">
+          <div className="space-y-4">
+            {/* Source Picker */}
+            <div className="space-y-3 border border-border rounded-lg p-4 bg-muted/30">
+              <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Source Configuration</p>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Project */}
+                <div>
+                  <label className="text-[10px] text-muted-foreground uppercase mb-1 block">Project</label>
+                  <Select value={sourceProjectId} onValueChange={v => { setSourceProjectId(v); setSourceModelId(''); setSourceBuildId(''); setSourceModuleId(''); setCompared(false); }}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select project..." /></SelectTrigger>
+                    <SelectContent>
+                      {store.projects.map(p => (
+                        <SelectItem key={p.id} value={p.id}>
+                          <span className="flex items-center gap-1.5"><Package className="w-3 h-3" /> {p.name}</span>
                         </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* STB Model */}
+                <div>
+                  <label className="text-[10px] text-muted-foreground uppercase mb-1 block">STB Model</label>
+                  <Select value={sourceModelId} onValueChange={v => { setSourceModelId(v); setSourceBuildId(''); setSourceModuleId(''); setCompared(false); }} disabled={!sourceProject}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select model..." /></SelectTrigger>
+                    <SelectContent>
+                      {sourceProject?.stbModels.map(m => (
+                        <SelectItem key={m.id} value={m.id}>
+                          <span className="flex items-center gap-1.5"><Tv className="w-3 h-3" /> {m.name}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* Build */}
+                <div>
+                  <label className="text-[10px] text-muted-foreground uppercase mb-1 block">Build</label>
+                  <Select value={sourceBuildId} onValueChange={v => { setSourceBuildId(v); setSourceModuleId(''); setCompared(false); }} disabled={!sourceModel}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select build..." /></SelectTrigger>
+                    <SelectContent>
+                      {sourceModel?.builds.map(b => (
+                        <SelectItem key={b.id} value={b.id}>
+                          <span className="flex items-center gap-1.5"><GitBranch className="w-3 h-3" /> {b.name} <span className="font-mono text-muted-foreground">v{b.version}</span></span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* Module (only in module mode) */}
+                {mode === 'module' && (
+                  <div>
+                    <label className="text-[10px] text-muted-foreground uppercase mb-1 block">Module</label>
+                    <Select value={sourceModuleId} onValueChange={v => { setSourceModuleId(v); setCompared(false); }} disabled={!sourceBuild}>
+                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select module..." /></SelectTrigger>
+                      <SelectContent>
+                        {sourceBuild?.modules.map(m => {
+                          const meta = MODULE_TYPE_META[m.type];
+                          return (
+                            <SelectItem key={m.id} value={m.id}>
+                              <span className="flex items-center gap-1.5">{meta.icon} {m.name}</span>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+              <Button size="sm" className="gap-1.5" onClick={handleCompare} disabled={!canCompare}>
+                <GitCompare className="w-3.5 h-3.5" /> Compare
+              </Button>
+            </div>
+
+            {/* Diff Results */}
+            {compared && (
+              <div className="space-y-4">
+                <Separator />
+
+                {/* Summary badges */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <Badge variant="outline" className="text-xs gap-1">
+                    <Plus className="w-3 h-3 text-node-module" /> {summary.added} new
+                  </Badge>
+                  <Badge variant="outline" className="text-xs gap-1">
+                    <Minus className="w-3 h-3 text-destructive" /> {summary.removed} missing
+                  </Badge>
+                  <Badge variant="outline" className="text-xs gap-1">
+                    <RefreshCw className="w-3 h-3 text-primary" /> {summary.changed} changed
+                  </Badge>
+                  <div className="ml-auto flex items-center gap-1">
+                    <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setAllActions('import')}>Import All</Button>
+                    <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setAllActions('omit')}>Omit All</Button>
+                  </div>
+                </div>
+
+                <Tabs defaultValue="unified">
+                  <TabsList className="h-8">
+                    <TabsTrigger value="unified" className="text-xs h-6">Unified Actions</TabsTrigger>
+                    <TabsTrigger value="sidebyside" className="text-xs h-6">Side by Side</TabsTrigger>
+                  </TabsList>
+
+                  {/* Unified Action List */}
+                  <TabsContent value="unified">
+                    {diffItems.length === 0 ? (
+                      <div className="text-center py-10">
+                        <CheckCircle2 className="w-8 h-8 text-node-module mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">Configurations are identical</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {diffItems.map(item => {
+                          const currentAction = actions[item.id] || item.suggestedAction;
+                          const actionMeta = ACTION_META[currentAction];
+
+                          return (
+                            <div key={item.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border bg-card hover:bg-muted/30 transition-colors">
+                              {/* Type icon */}
+                              <div className={`shrink-0 ${
+                                item.type === 'node_added' || item.type === 'edge_added' ? 'text-node-module' :
+                                item.type === 'node_removed' || item.type === 'edge_removed' ? 'text-destructive' :
+                                'text-primary'
+                              }`}>
+                                {item.type.includes('added') ? <Plus className="w-4 h-4" /> :
+                                 item.type.includes('removed') ? <Minus className="w-4 h-4" /> :
+                                 <RefreshCw className="w-4 h-4" />}
+                              </div>
+
+                              {/* Info */}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium text-foreground truncate">{item.label}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">{item.description}</p>
+                              </div>
+
+                              {/* Action selector */}
+                              <div className="flex items-center gap-1 shrink-0">
+                                {getAvailableActions(item).map(action => {
+                                  const meta = ACTION_META[action];
+                                  const Icon = meta.icon;
+                                  const isActive = currentAction === action;
+                                  return (
+                                    <Button
+                                      key={action}
+                                      variant={isActive ? 'default' : 'ghost'}
+                                      size="sm"
+                                      className={`h-6 text-[10px] gap-1 px-2 ${!isActive ? meta.color : ''}`}
+                                      onClick={() => setAction(item.id, action)}
+                                    >
+                                      <Icon className="w-3 h-3" />
+                                      {meta.label}
+                                    </Button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  {/* Side by Side */}
+                  <TabsContent value="sidebyside">
+                    {diffItems.length === 0 ? (
+                      <div className="text-center py-10">
+                        <CheckCircle2 className="w-8 h-8 text-node-module mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">Configurations are identical</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {diffItems.filter(i => i.sourceValue || i.targetValue).map(item => (
+                          <div key={item.id} className="rounded-lg border border-border overflow-hidden">
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 text-xs font-medium">
+                              {item.type.includes('added') ? <Plus className="w-3 h-3 text-node-module" /> :
+                               item.type.includes('removed') ? <Minus className="w-3 h-3 text-destructive" /> :
+                               <RefreshCw className="w-3 h-3 text-primary" />}
+                              {item.label}
+                            </div>
+                            <div className="grid grid-cols-2 divide-x divide-border">
+                              <div className="p-2.5">
+                                <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Source</p>
+                                <p className="text-[11px] font-mono text-foreground break-all">
+                                  {item.sourceValue || <span className="text-muted-foreground italic">— not present —</span>}
+                                </p>
+                              </div>
+                              <div className="p-2.5">
+                                <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Current</p>
+                                <p className="text-[11px] font-mono text-foreground break-all">
+                                  {item.targetValue || <span className="text-muted-foreground italic">— not present —</span>}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </div>
             )}
           </div>
-          <Button size="sm" className="gap-1.5" onClick={handleCompare} disabled={!canCompare}>
-            <GitCompare className="w-3.5 h-3.5" /> Compare
-          </Button>
-        </div>
+        </ScrollArea>
 
-        {/* Diff Results */}
-        {compared && (
-          <>
-            <Separator />
-
-            {/* Summary badges */}
-            <div className="flex items-center gap-3 flex-wrap shrink-0">
-              <Badge variant="outline" className="text-xs gap-1">
-                <Plus className="w-3 h-3 text-node-module" /> {summary.added} new
-              </Badge>
-              <Badge variant="outline" className="text-xs gap-1">
-                <Minus className="w-3 h-3 text-destructive" /> {summary.removed} missing
-              </Badge>
-              <Badge variant="outline" className="text-xs gap-1">
-                <RefreshCw className="w-3 h-3 text-primary" /> {summary.changed} changed
-              </Badge>
-              <div className="ml-auto flex items-center gap-1">
-                <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setAllActions('import')}>Import All</Button>
-                <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setAllActions('omit')}>Omit All</Button>
-              </div>
-            </div>
-
-            <Tabs defaultValue="unified" className="flex-1 min-h-0 flex flex-col overflow-hidden">
-              <TabsList className="h-8 shrink-0">
-                <TabsTrigger value="unified" className="text-xs h-6">Unified Actions</TabsTrigger>
-                <TabsTrigger value="sidebyside" className="text-xs h-6">Side by Side</TabsTrigger>
-              </TabsList>
-
-              {/* Unified Action List */}
-              <TabsContent value="unified" className="flex-1 min-h-0 overflow-hidden">
-                <ScrollArea className="h-full max-h-[40vh]">
-                  {diffItems.length === 0 ? (
-                    <div className="text-center py-10">
-                      <CheckCircle2 className="w-8 h-8 text-node-module mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Configurations are identical</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-1.5 pr-3">
-                      {diffItems.map(item => {
-                        const currentAction = actions[item.id] || item.suggestedAction;
-                        const actionMeta = ACTION_META[currentAction];
-                        const ActionIcon = actionMeta.icon;
-
-                        return (
-                          <div key={item.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border bg-card hover:bg-muted/30 transition-colors">
-                            {/* Type icon */}
-                            <div className={`shrink-0 ${
-                              item.type === 'node_added' || item.type === 'edge_added' ? 'text-node-module' :
-                              item.type === 'node_removed' || item.type === 'edge_removed' ? 'text-destructive' :
-                              'text-primary'
-                            }`}>
-                              {item.type.includes('added') ? <Plus className="w-4 h-4" /> :
-                               item.type.includes('removed') ? <Minus className="w-4 h-4" /> :
-                               <RefreshCw className="w-4 h-4" />}
-                            </div>
-
-                            {/* Info */}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-foreground truncate">{item.label}</p>
-                              <p className="text-[10px] text-muted-foreground truncate">{item.description}</p>
-                            </div>
-
-                            {/* Action selector */}
-                            <div className="flex items-center gap-1 shrink-0">
-                              {getAvailableActions(item).map(action => {
-                                const meta = ACTION_META[action];
-                                const Icon = meta.icon;
-                                const isActive = currentAction === action;
-                                return (
-                                  <Button
-                                    key={action}
-                                    variant={isActive ? 'default' : 'ghost'}
-                                    size="sm"
-                                    className={`h-6 text-[10px] gap-1 px-2 ${!isActive ? meta.color : ''}`}
-                                    onClick={() => setAction(item.id, action)}
-                                  >
-                                    <Icon className="w-3 h-3" />
-                                    {meta.label}
-                                  </Button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </ScrollArea>
-              </TabsContent>
-
-              {/* Side by Side */}
-              <TabsContent value="sidebyside" className="flex-1 min-h-0 overflow-hidden">
-                <ScrollArea className="h-full max-h-[40vh]">
-                  {diffItems.length === 0 ? (
-                    <div className="text-center py-10">
-                      <CheckCircle2 className="w-8 h-8 text-node-module mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Configurations are identical</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2 pr-3">
-                      {diffItems.filter(i => i.sourceValue || i.targetValue).map(item => (
-                        <div key={item.id} className="rounded-lg border border-border overflow-hidden">
-                          <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 text-xs font-medium">
-                            {item.type.includes('added') ? <Plus className="w-3 h-3 text-node-module" /> :
-                             item.type.includes('removed') ? <Minus className="w-3 h-3 text-destructive" /> :
-                             <RefreshCw className="w-3 h-3 text-primary" />}
-                            {item.label}
-                          </div>
-                          <div className="grid grid-cols-2 divide-x divide-border">
-                            <div className="p-2.5">
-                              <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Source</p>
-                              <p className="text-[11px] font-mono text-foreground break-all">
-                                {item.sourceValue || <span className="text-muted-foreground italic">— not present —</span>}
-                              </p>
-                            </div>
-                            <div className="p-2.5">
-                              <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Current</p>
-                              <p className="text-[11px] font-mono text-foreground break-all">
-                                {item.targetValue || <span className="text-muted-foreground italic">— not present —</span>}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
-              </TabsContent>
-            </Tabs>
-          </>
-        )}
-
-        <DialogFooter className="flex items-center justify-between gap-3">
+        <DialogFooter className="flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
             {compared && diffItems.length > 0 && (
               <>
