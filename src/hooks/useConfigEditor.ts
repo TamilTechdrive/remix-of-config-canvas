@@ -416,6 +416,17 @@ th{color:#4dd68e;font-size:.8rem;text-transform:uppercase}
     toast.success('Auto-Resolved', { description: `Applied ${fixes.length} fixes` });
   }, []);
 
+  const replaceAll = useCallback((newNodes: Node[], newEdges: Edge[]) => {
+    setNodes(newNodes);
+    setEdges(newEdges);
+    const maxId = newNodes.reduce((max, n) => {
+      const num = parseInt(n.id.replace('node_', ''), 10);
+      return isNaN(num) ? max : Math.max(max, num);
+    }, 0);
+    idCounter.current = maxId + 1;
+    setSelectedNodeId(null);
+  }, []);
+
   return {
     nodes,
     edges,
@@ -439,6 +450,7 @@ th{color:#4dd68e;font-size:.8rem;text-transform:uppercase}
     updateNodeMeta,
     disconnectAllEdges,
     disconnectEdge,
+    replaceAll,
   };
 };
 
