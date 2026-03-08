@@ -207,18 +207,25 @@ const EditorCanvas = () => {
           <span className="text-muted-foreground">{graphAnalysis.totalConflicts} conflicts</span>
         </div>
         <span className="text-muted-foreground ml-auto">{nodes.length} nodes · {edges.length} edges</span>
-        {/* Auto-save indicator */}
-        <div className="flex items-center gap-1.5 ml-2">
-          {autoSaveStatus === 'saving' && (
+        {/* Auto-save indicator with toggle */}
+        <button
+          onClick={toggleAutoSave}
+          className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded hover:bg-secondary transition-colors"
+          title={autoSaveEnabled ? 'Click to disable auto-save' : 'Click to enable auto-save'}
+        >
+          {!autoSaveEnabled && (
+            <><Power className="w-3 h-3 text-muted-foreground/40" /><span className="text-muted-foreground/40 line-through">Auto-save</span></>
+          )}
+          {autoSaveEnabled && autoSaveStatus === 'saving' && (
             <><Loader2 className="w-3 h-3 text-primary animate-spin" /><span className="text-primary">Saving...</span></>
           )}
-          {autoSaveStatus === 'saved' && (
+          {autoSaveEnabled && autoSaveStatus === 'saved' && (
             <><CheckCircle2 className="w-3 h-3 text-node-module" /><span className="text-node-module">Saved</span></>
           )}
-          {autoSaveStatus === 'idle' && (
-            <><Save className="w-3 h-3 text-muted-foreground/50" /><span className="text-muted-foreground/50">Auto-save</span></>
+          {autoSaveEnabled && (autoSaveStatus === 'idle' || autoSaveStatus === 'off') && (
+            <><Save className="w-3 h-3 text-primary/60" /><span className="text-primary/60">Auto-save</span></>
           )}
-        </div>
+        </button>
       </div>
 
       <EditorToolbar
