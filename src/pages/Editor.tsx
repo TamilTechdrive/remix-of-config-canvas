@@ -125,6 +125,31 @@ const EditorCanvas = () => {
     if (ok) disconnectAllEdges(nodeId);
   }, [edges, confirm, disconnectAllEdges]);
 
+  const onFixIssue = useCallback(
+    (issue: RuleIssue) => {
+      if (!issue.fix) return;
+      if (issue.fix.action === 'add_option') {
+        updateNodeProperty(issue.fix.payload.nodeId, 'included', true);
+      } else if (issue.fix.action === 'remove_option') {
+        updateNodeProperty(issue.fix.payload.nodeId, 'included', false);
+      }
+    },
+    [updateNodeProperty]
+  );
+
+  const onToggleIncluded = useCallback(
+    (nodeId: string) => {
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) return;
+      const data = node.data as unknown as ConfigNodeData;
+      const current = data.properties?.included === true;
+      updateNodeProperty(nodeId, 'included', !current);
+    },
+    [nodes, updateNodeProperty]
+  );
+
+  // ── Confirmed critical actions ──────────────────────────────
+
   const confirmedAutoResolveAll = useCallback(async (fixes: Array<{ action: string; payload: Record<string, string> }>) => {
     const ok = await confirm({
       title: 'Auto-Resolve All Issues',
@@ -133,6 +158,74 @@ const EditorCanvas = () => {
     });
     if (ok) autoResolveAll(fixes);
   }, [confirm, autoResolveAll]);
+
+  const confirmedDisconnectEdge = useCallback(async (edgeId: string) => {
+    const edge = edges.find(e => e.id === edgeId);
+    if (!edge) return;
+    const srcLabel = (nodes.find(n => n.id === edge.source)?.data as unknown as ConfigNodeData)?.label || edge.source;
+    const tgtLabel = (nodes.find(n => n.id === edge.target)?.data as unknown as ConfigNodeData)?.label || edge.target;
+    const ok = await confirm({
+      title: 'Disconnect Edge',
+      description: `Remove connection from "${srcLabel}" → "${tgtLabel}"?`,
+      confirmLabel: 'Disconnect',
+      variant: 'destructive',
+    });
+    if (ok) disconnectEdge(edgeId);
+  }, [edges, nodes, confirm, disconnectEdge]);
+
+  const confirmedLoadSample = useCallback(async () => {
+    const ok = await confirm({
+      title: 'Load Sample Data',
+      description: 'This will replace all current nodes and connections with sample data. Unsaved changes will be lost.',
+      confirmLabel: 'Load Sample',
+      variant: 'destructive',
+    });
+    if (ok) loadSampleData();
+  }, [confirm, loadSampleData]);
+
+  const confirmedImport = useCallback(async () => {
+    const ok = await confirm({
+      title: 'Import Configuration',
+      description: 'Importing will replace all current nodes and connections. Unsaved changes will be lost.',
+      confirmLabel: 'Continue Import',
+      variant: 'destructive',
+    });
+    if (ok) importConfig();
+  }, [confirm, importConfig]);
+
+  const confirmedToggleIncluded = useCallback(async (nodeId: string) => {
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) return;
+    const data = node.data as unknown as ConfigNodeData;
+    const current = data.properties?.included === true;
+    const action = current ? 'Exclude' : 'Include';
+    const ok = await confirm({
+      title: `${action} Node`,
+      description: `${action} "${data.label}" ${current ? 'from' : 'in'} the configuration?`,
+      confirmLabel: action,
+    });
+    if (ok) onToggleIncluded(nodeId);
+  }, [nodes, confirm, onToggleIncluded]);
+
+  const confirmedRemoveUserRule = useCallback(async (nodeId: string, ruleId: string) => {
+    const ok = await confirm({
+      title: 'Remove Rule',
+      description: 'Are you sure you want to remove this user-defined rule?',
+      confirmLabel: 'Remove',
+      variant: 'destructive',
+    });
+    if (ok) removeUserRule(nodeId, ruleId);
+  }, [confirm, removeUserRule]);
+
+  const confirmedFixIssue = useCallback(async (issue: RuleIssue) => {
+    if (!issue.fix) return;
+    const ok = await confirm({
+      title: 'Apply Fix',
+      description: `Apply "${issue.fix.label}" to resolve: ${issue.title}?`,
+      confirmLabel: 'Apply Fix',
+    });
+    if (ok) onFixIssue(issue);
+  }, [confirm, onFixIssue]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -153,7 +246,7 @@ const EditorCanvas = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedNodeId, rightPanel, setSelectedNodeId, deleteNode]);
+  }, [selectedNodeId, rightPanel, setSelectedNodeId, confirmedDeleteNode]);
 
   const graphAnalysis = useMemo(
     () => analyzeFullGraph(nodes, edges, SAMPLE_CONFIG),
@@ -181,7 +274,6 @@ const EditorCanvas = () => {
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: { id: string }) => {
       setSelectedNodeId(node.id);
-      // Keep current panel open, or open properties by default
       setRightPanel((prev) => prev === 'none' ? 'properties' : prev);
     },
     [setSelectedNodeId]
@@ -197,7 +289,6 @@ const EditorCanvas = () => {
   );
 
   const onPaneClick = useCallback(() => {
-    // Don't close panel, just deselect node
     setSelectedNodeId(null);
     setRightPanel('none');
   }, [setSelectedNodeId]);
@@ -212,29 +303,6 @@ const EditorCanvas = () => {
       }
     },
     [nodes, setCenter, setSelectedNodeId]
-  );
-
-  const onFixIssue = useCallback(
-    (issue: RuleIssue) => {
-      if (!issue.fix) return;
-      if (issue.fix.action === 'add_option') {
-        updateNodeProperty(issue.fix.payload.nodeId, 'included', true);
-      } else if (issue.fix.action === 'remove_option') {
-        updateNodeProperty(issue.fix.payload.nodeId, 'included', false);
-      }
-    },
-    [updateNodeProperty]
-  );
-
-  const onToggleIncluded = useCallback(
-    (nodeId: string) => {
-      const node = nodes.find((n) => n.id === nodeId);
-      if (!node) return;
-      const data = node.data as unknown as ConfigNodeData;
-      const current = data.properties?.included === true;
-      updateNodeProperty(nodeId, 'included', !current);
-    },
-    [nodes, updateNodeProperty]
   );
 
   const onToggleVisible = useCallback(
@@ -291,8 +359,8 @@ const EditorCanvas = () => {
 
       <EditorToolbar
         onExport={exportConfig}
-        onImport={importConfig}
-        onLoadSample={loadSampleData}
+        onImport={confirmedImport}
+        onLoadSample={confirmedLoadSample}
         nodeCount={nodes.length}
         edgeCount={edges.length}
         onCloudSave={() => {
@@ -378,11 +446,11 @@ const EditorCanvas = () => {
                   rawConfig={SAMPLE_CONFIG}
                   onClose={() => setRightPanel('none')}
                   onFocusNode={onFocusNode}
-                  onFixIssue={onFixIssue}
+                  onFixIssue={confirmedFixIssue}
                   onAutoResolveAll={confirmedAutoResolveAll}
-                  onToggleIncluded={onToggleIncluded}
+                  onToggleIncluded={confirmedToggleIncluded}
                   onAddUserRule={addUserRule}
-                  onRemoveUserRule={removeUserRule}
+                  onRemoveUserRule={confirmedRemoveUserRule}
                   onUpdateNodeMeta={updateNodeMeta}
                 />
               </div>
@@ -412,12 +480,12 @@ const EditorCanvas = () => {
           edges={edges}
           onClose={() => setContextMenu({ show: false, x: 0, y: 0, nodeId: null })}
           onDelete={confirmedDeleteNode}
-          onToggleIncluded={onToggleIncluded}
+          onToggleIncluded={confirmedToggleIncluded}
           onToggleVisible={onToggleVisible}
           onFocusNode={onFocusNode}
           onShowInsights={(nodeId) => { setSelectedNodeId(nodeId); setRightPanel('actions'); }}
           onDisconnectAll={confirmedDisconnectAll}
-          onDisconnectEdge={disconnectEdge}
+          onDisconnectEdge={confirmedDisconnectEdge}
           onCopyNodeId={(nodeId) => { navigator.clipboard.writeText(nodeId); toast.success('Node ID copied'); }}
         />
       </div>
