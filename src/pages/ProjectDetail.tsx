@@ -678,6 +678,25 @@ const ProjectDetail = () => {
       </Dialog>
 
       <ConfirmDialog />
+
+      {/* Build-level Import & Compare */}
+      {selectedBuild && selectedModelId && (
+        <ImportCompareDialog
+          open={buildCompareOpen}
+          onOpenChange={setBuildCompareOpen}
+          currentNodes={selectedBuild.modules.flatMap(m => m.nodes)}
+          currentEdges={selectedBuild.modules.flatMap(m => m.edges)}
+          onApply={(mergedNodes, mergedEdges) => {
+            // For build-level: replace the first module's config or distribute back
+            // Simple approach: if build has one module, replace it; otherwise save merged into first module
+            if (selectedBuild.modules.length > 0) {
+              const firstMod = selectedBuild.modules[0];
+              store.saveModuleConfig(project.id, selectedModelId, selectedBuild.id, firstMod.id, mergedNodes, mergedEdges);
+            }
+          }}
+          mode="build"
+        />
+      )}
     </div>
   );
 };
