@@ -203,6 +203,11 @@ export const useConfigEditor = () => {
     setSelectedNodeId(null);
   }, []);
 
+  const disconnectAllEdges = useCallback((nodeId: string) => {
+    setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
+    toast.info('Disconnected', { description: 'All connections removed from this node' });
+  }, []);
+
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
   // ── Export helpers ──────────────────────────────
