@@ -1,4 +1,4 @@
-import { Upload, ZoomIn, ZoomOut, Maximize2, Database } from 'lucide-react';
+import { Upload, ZoomIn, ZoomOut, Maximize2, Database, GitCompare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useReactFlow } from '@xyflow/react';
@@ -9,6 +9,7 @@ interface EditorToolbarProps {
   onExport: (format: 'json' | 'xml' | 'html' | 'opt') => void;
   onImport: () => void;
   onLoadSample: () => void;
+  onCompare?: () => void;
   nodeCount: number;
   edgeCount: number;
   onCloudSave: (configData: Record<string, unknown>) => Record<string, unknown>;
