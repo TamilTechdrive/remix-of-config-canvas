@@ -280,7 +280,7 @@ const EditorCanvas = () => {
               };
               return colors[data.type] || '#666';
             }}
-            maskColor="hsla(222, 20%, 14%, 0.8)"
+            maskColor="hsla(218, 20%, 96%, 0.85)"
           />
         </ReactFlow>
 
