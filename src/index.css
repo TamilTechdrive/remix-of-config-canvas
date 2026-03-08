@@ -73,37 +73,37 @@
 
 /* React Flow overrides */
 .react-flow__background {
-  background-color: hsl(222 20% 14%) !important;
+  background-color: hsl(220 16% 22%) !important;
 }
 
 .react-flow__minimap {
-  background-color: hsl(222 22% 11%) !important;
-  border: 1px solid hsl(222 14% 24%) !important;
+  background-color: hsl(220 18% 18%) !important;
+  border: 1px solid hsl(220 12% 34%) !important;
   border-radius: 0.625rem !important;
 }
 
 .react-flow__controls {
-  background: hsl(222 18% 17%) !important;
-  border: 1px solid hsl(222 14% 24%) !important;
+  background: hsl(220 14% 26%) !important;
+  border: 1px solid hsl(220 12% 34%) !important;
   border-radius: 0.625rem !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
 }
 
 .react-flow__controls button {
-  background: hsl(222 18% 17%) !important;
-  border-color: hsl(222 14% 24%) !important;
-  color: hsl(216 10% 68%) !important;
-  fill: hsl(216 10% 68%) !important;
+  background: hsl(220 14% 26%) !important;
+  border-color: hsl(220 12% 34%) !important;
+  color: hsl(215 12% 65%) !important;
+  fill: hsl(215 12% 65%) !important;
 }
 
 .react-flow__controls button:hover {
-  background: hsl(222 16% 22%) !important;
-  color: hsl(216 12% 92%) !important;
-  fill: hsl(216 12% 92%) !important;
+  background: hsl(220 12% 32%) !important;
+  color: hsl(215 20% 93%) !important;
+  fill: hsl(215 20% 93%) !important;
 }
 
 .react-flow__edge-path {
-  stroke: hsl(222 14% 32%) !important;
+  stroke: hsl(220 12% 40%) !important;
   stroke-width: 2 !important;
 }
 
