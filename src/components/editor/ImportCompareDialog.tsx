@@ -270,7 +270,7 @@ const ImportCompareDialog = ({
             <Separator />
 
             {/* Summary badges */}
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap shrink-0">
               <Badge variant="outline" className="text-xs gap-1">
                 <Plus className="w-3 h-3 text-node-module" /> {summary.added} new
               </Badge>
