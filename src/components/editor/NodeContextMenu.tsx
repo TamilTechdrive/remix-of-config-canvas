@@ -34,6 +34,18 @@ const NodeContextMenu = ({
 }: NodeContextMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [showConnections, setShowConnections] = useState(false);
+  const [adjustedPos, setAdjustedPos] = useState({ x: state.x, y: state.y });
+
+  useEffect(() => {
+    if (!state.show || !menuRef.current) return;
+    const rect = menuRef.current.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    setAdjustedPos({
+      x: state.x + rect.width > vw ? Math.max(0, vw - rect.width - 8) : state.x,
+      y: state.y + rect.height > vh ? Math.max(0, vh - rect.height - 8) : state.y,
+    });
+  }, [state.show, state.x, state.y]);
 
   useEffect(() => {
     if (!state.show) return;
@@ -89,7 +101,7 @@ const NodeContextMenu = ({
     <div
       ref={menuRef}
       className="fixed z-[100] min-w-[240px] bg-popover border border-border rounded-lg shadow-2xl py-1.5 animate-in fade-in-0 zoom-in-95"
-      style={{ left: state.x, top: state.y }}
+      style={{ left: adjustedPos.x, top: adjustedPos.y }}
     >
       {/* Header */}
       <div className="px-3 py-2 border-b border-border mb-1">
