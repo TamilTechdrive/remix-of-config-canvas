@@ -41,14 +41,37 @@ const EditorCanvas = () => {
 
   const [showInsights, setShowInsights] = useState(false);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({ show: false, x: 0, y: 0, nodeId: null });
-  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(() => {
+    const stored = localStorage.getItem('configflow_autosave_enabled');
+    return stored !== null ? stored === 'true' : true;
+  });
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'off'>('idle');
   const { screenToFlowPosition, setCenter } = useReactFlow();
 
   // Auto-save to localStorage
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const lastSaveRef = useRef<string>('');
 
+  const toggleAutoSave = useCallback(() => {
+    setAutoSaveEnabled(prev => {
+      const next = !prev;
+      localStorage.setItem('configflow_autosave_enabled', String(next));
+      if (!next) {
+        setAutoSaveStatus('off');
+        toast.info('Auto-save disabled');
+      } else {
+        setAutoSaveStatus('idle');
+        toast.success('Auto-save enabled');
+      }
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
+    if (!autoSaveEnabled) {
+      clearInterval(saveTimerRef.current);
+      return;
+    }
     saveTimerRef.current = setInterval(() => {
       const data = JSON.stringify({ nodes, edges });
       if (data !== lastSaveRef.current) {
@@ -65,7 +88,7 @@ const EditorCanvas = () => {
       }
     }, AUTO_SAVE_INTERVAL);
     return () => clearInterval(saveTimerRef.current);
-  }, [nodes, edges]);
+  }, [nodes, edges, autoSaveEnabled]);
 
   // Load autosave on mount
   useEffect(() => {
