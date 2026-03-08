@@ -3,14 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Plus, Trash2, Pencil, Copy, GitBranch,
   Package, Settings2, Download, ChevronRight, Power,
-  PowerOff, Boxes,
+  PowerOff, Boxes, Tv, Cpu, ChevronDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from '@/components/ui/dialog';
@@ -23,9 +22,12 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Collapsible, CollapsibleContent, CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { useProjectStore } from '@/hooks/useProjectStore';
 import { useConfirmDialog } from '@/hooks/useConfirmDialog';
-import type { Build, BuildModule, ModuleType } from '@/types/projectTypes';
+import type { Build, BuildModule, ModuleType, STBModel } from '@/types/projectTypes';
 import { BUILD_STATUS_META, MODULE_TYPE_META, PROJECT_STATUS_META } from '@/types/projectTypes';
 import { toast } from 'sonner';
 
@@ -37,10 +39,21 @@ const ProjectDetail = () => {
 
   const project = store.getProject(projectId || '');
 
+  // Selection state: which STB model + which build is active
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
   const [selectedBuildId, setSelectedBuildId] = useState<string | null>(null);
+
+  // Dialogs
+  const [createModelOpen, setCreateModelOpen] = useState(false);
+  const [editModel, setEditModel] = useState<STBModel | null>(null);
   const [createBuildOpen, setCreateBuildOpen] = useState(false);
   const [editBuildOpen, setEditBuildOpen] = useState<Build | null>(null);
   const [addModuleOpen, setAddModuleOpen] = useState(false);
+
+  // STB Model form
+  const [modelName, setModelName] = useState('');
+  const [modelDesc, setModelDesc] = useState('');
+  const [modelChipset, setModelChipset] = useState('');
 
   // Build form
   const [buildName, setBuildName] = useState('');
@@ -63,27 +76,72 @@ const ProjectDetail = () => {
     );
   }
 
-  const selectedBuild = project.builds.find(b => b.id === selectedBuildId);
+  const selectedModel = project.stbModels.find(s => s.id === selectedModelId);
+  const selectedBuild = selectedModel?.builds.find(b => b.id === selectedBuildId);
+
+  // ── STB Model actions ──────────────────────────────
+
+  const handleCreateModel = () => {
+    if (!modelName.trim()) return;
+    const model = store.createSTBModel(project.id, {
+      name: modelName.trim(),
+      description: modelDesc.trim(),
+      chipset: modelChipset.trim(),
+    });
+    setCreateModelOpen(false);
+    if (model) setSelectedModelId(model.id);
+    setModelName(''); setModelDesc(''); setModelChipset('');
+  };
+
+  const handleEditModel = () => {
+    if (!editModel || !modelName.trim()) return;
+    store.updateSTBModel(project.id, editModel.id, {
+      name: modelName.trim(),
+      description: modelDesc.trim(),
+      chipset: modelChipset.trim(),
+    });
+    setEditModel(null);
+  };
+
+  const handleDeleteModel = async (model: STBModel) => {
+    const ok = await confirm({
+      title: 'Delete STB Model',
+      description: `Delete "${model.name}" and all its builds and modules? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      variant: 'destructive',
+    });
+    if (ok) {
+      store.deleteSTBModel(project.id, model.id);
+      if (selectedModelId === model.id) { setSelectedModelId(null); setSelectedBuildId(null); }
+    }
+  };
+
+  const handleCloneModel = async (model: STBModel) => {
+    const ok = await confirm({
+      title: 'Clone STB Model',
+      description: `Clone "${model.name}" with all builds and modules?`,
+      confirmLabel: 'Clone',
+    });
+    if (ok) store.cloneSTBModel(project.id, model.id);
+  };
 
   // ── Build actions ──────────────────────────────
 
   const handleCreateBuild = () => {
-    if (!buildName.trim()) return;
-    const build = store.createBuild(project.id, {
+    if (!buildName.trim() || !selectedModelId) return;
+    const build = store.createBuild(project.id, selectedModelId, {
       name: buildName.trim(),
       version: buildVersion.trim() || '1.0.0',
       description: buildDesc.trim(),
     });
     setCreateBuildOpen(false);
     if (build) setSelectedBuildId(build.id);
-    setBuildName('');
-    setBuildVersion('1.0.0');
-    setBuildDesc('');
+    setBuildName(''); setBuildVersion('1.0.0'); setBuildDesc('');
   };
 
   const handleEditBuild = () => {
-    if (!editBuildOpen || !buildName.trim()) return;
-    store.updateBuild(project.id, editBuildOpen.id, {
+    if (!editBuildOpen || !buildName.trim() || !selectedModelId) return;
+    store.updateBuild(project.id, selectedModelId, editBuildOpen.id, {
       name: buildName.trim(),
       version: buildVersion.trim(),
       description: buildDesc.trim(),
@@ -92,26 +150,28 @@ const ProjectDetail = () => {
   };
 
   const handleDeleteBuild = async (build: Build) => {
+    if (!selectedModelId) return;
     const ok = await confirm({
       title: 'Delete Build',
-      description: `Delete "${build.name} v${build.version}" and all its modules? This cannot be undone.`,
+      description: `Delete "${build.name} v${build.version}" and all its modules?`,
       confirmLabel: 'Delete',
       variant: 'destructive',
     });
     if (ok) {
-      store.deleteBuild(project.id, build.id);
+      store.deleteBuild(project.id, selectedModelId, build.id);
       if (selectedBuildId === build.id) setSelectedBuildId(null);
     }
   };
 
   const handleVersionBuild = async (build: Build) => {
+    if (!selectedModelId) return;
     const ok = await confirm({
       title: 'Create New Version',
-      description: `Clone "${build.name} v${build.version}" as a new version? All modules will be copied.`,
+      description: `Clone "${build.name} v${build.version}" as a new version?`,
       confirmLabel: 'Create Version',
     });
     if (ok) {
-      const clone = store.cloneBuild(project.id, build.id);
+      const clone = store.cloneBuild(project.id, selectedModelId, build.id);
       if (clone) setSelectedBuildId(clone.id);
     }
   };
@@ -119,43 +179,45 @@ const ProjectDetail = () => {
   // ── Module actions ──────────────────────────────
 
   const handleAddModule = () => {
-    if (!selectedBuildId || !modName.trim()) return;
-    store.addModule(project.id, selectedBuildId, {
+    if (!selectedModelId || !selectedBuildId || !modName.trim()) return;
+    store.addModule(project.id, selectedModelId, selectedBuildId, {
       name: modName.trim(),
       type: modType,
       description: modDesc.trim(),
     });
     setAddModuleOpen(false);
-    setModName('');
-    setModType('egos');
-    setModDesc('');
+    setModName(''); setModType('egos'); setModDesc('');
   };
 
   const handleDeleteModule = async (mod: BuildModule) => {
+    if (!selectedModelId || !selectedBuildId) return;
     const ok = await confirm({
       title: 'Delete Module',
-      description: `Delete "${mod.name}" and all its configuration? This cannot be undone.`,
+      description: `Delete "${mod.name}" and all its configuration?`,
       confirmLabel: 'Delete',
       variant: 'destructive',
     });
-    if (ok && selectedBuildId) {
-      store.deleteModule(project.id, selectedBuildId, mod.id);
-    }
+    if (ok) store.deleteModule(project.id, selectedModelId, selectedBuildId, mod.id);
   };
 
   const handleToggleModule = (mod: BuildModule) => {
-    if (!selectedBuildId) return;
-    store.updateModule(project.id, selectedBuildId, mod.id, { enabled: !mod.enabled });
+    if (!selectedModelId || !selectedBuildId) return;
+    store.updateModule(project.id, selectedModelId, selectedBuildId, mod.id, { enabled: !mod.enabled });
   };
 
   const openModuleEditor = (mod: BuildModule) => {
-    navigate(`/projects/${project.id}/builds/${selectedBuildId}/modules/${mod.id}/editor`);
+    navigate(`/projects/${project.id}/models/${selectedModelId}/builds/${selectedBuildId}/modules/${mod.id}/editor`);
   };
 
   // ── Export ──────────────────────────────
 
   const exportBuild = (build: Build) => {
-    const data = { project: { id: project.id, name: project.name }, build, exportedAt: new Date().toISOString() };
+    const data = {
+      project: { id: project.id, name: project.name },
+      stbModel: selectedModel ? { id: selectedModel.id, name: selectedModel.name } : null,
+      build,
+      exportedAt: new Date().toISOString(),
+    };
     downloadJSON(data, `${project.name}-${build.name}-v${build.version}.json`);
     toast.success('Build Exported');
   };
@@ -190,101 +252,170 @@ const ProjectDetail = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-6">
-        {/* Builds sidebar */}
-        <div className="col-span-12 lg:col-span-4 space-y-3">
+        {/* Left: STB Models + Builds */}
+        <div className="col-span-12 lg:col-span-4 space-y-4">
+          {/* STB Models */}
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <GitBranch className="w-4 h-4 text-primary" /> Builds
-              <Badge variant="secondary" className="text-[10px]">{project.builds.length}</Badge>
+              <Tv className="w-4 h-4 text-primary" /> STB Models
+              <Badge variant="secondary" className="text-[10px]">{project.stbModels.length}</Badge>
             </h2>
-            <Button size="sm" onClick={() => { setBuildName(''); setBuildVersion('1.0.0'); setBuildDesc(''); setCreateBuildOpen(true); }} className="gap-1 h-7 text-xs">
-              <Plus className="w-3 h-3" /> New Build
+            <Button size="sm" onClick={() => { setModelName(''); setModelDesc(''); setModelChipset(''); setCreateModelOpen(true); }} className="gap-1 h-7 text-xs">
+              <Plus className="w-3 h-3" /> Add Model
             </Button>
           </div>
 
-          {project.builds.length === 0 ? (
+          {project.stbModels.length === 0 ? (
             <div className="text-center py-10 border border-dashed border-border rounded-lg">
-              <Boxes className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
-              <p className="text-xs text-muted-foreground">No builds yet</p>
+              <Tv className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
+              <p className="text-xs text-muted-foreground">No STB models yet</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-1">Add your first STB model to start building</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {project.builds
-                .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                .map(build => (
-                <Card
-                  key={build.id}
-                  className={`cursor-pointer transition-all ${selectedBuildId === build.id ? 'border-primary ring-1 ring-primary/20' : 'hover:border-primary/30'}`}
-                  onClick={() => setSelectedBuildId(build.id)}
+              {project.stbModels.map(model => (
+                <Collapsible
+                  key={model.id}
+                  open={selectedModelId === model.id}
+                  onOpenChange={open => {
+                    setSelectedModelId(open ? model.id : null);
+                    if (!open) setSelectedBuildId(null);
+                  }}
                 >
-                  <CardContent className="p-3">
-                    <div className="flex items-start justify-between">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{build.name}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-[9px] h-4 font-mono">v{build.version}</Badge>
-                          <Badge className={`text-[9px] h-4 ${BUILD_STATUS_META[build.status].color}`}>
-                            {BUILD_STATUS_META[build.status].label}
-                          </Badge>
+                  <Card className={`transition-all ${selectedModelId === model.id ? 'border-primary ring-1 ring-primary/20' : 'hover:border-primary/30'}`}>
+                    <CardContent className="p-0">
+                      {/* Model header */}
+                      <CollapsibleTrigger className="w-full">
+                        <div className="flex items-center gap-3 p-3 cursor-pointer">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                            <Tv className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1 text-left min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{model.name}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {model.chipset && (
+                                <Badge variant="outline" className="text-[9px] h-4 gap-0.5">
+                                  <Cpu className="w-2.5 h-2.5" /> {model.chipset}
+                                </Badge>
+                              )}
+                              <span className="text-[10px] text-muted-foreground">{model.builds.length} builds</span>
+                            </div>
+                          </div>
+                          <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${selectedModelId === model.id ? 'rotate-180' : ''}`} />
                         </div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon" className="h-6 w-6">
-                            <Settings2 className="w-3 h-3" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" onClick={e => e.stopPropagation()}>
-                          <DropdownMenuItem onClick={() => {
-                            setBuildName(build.name);
-                            setBuildVersion(build.version);
-                            setBuildDesc(build.description);
-                            setEditBuildOpen(build);
+                      </CollapsibleTrigger>
+
+                      <CollapsibleContent>
+                        {/* Model actions */}
+                        <div className="px-3 pb-2 flex items-center gap-1">
+                          <Button variant="ghost" size="sm" className="h-6 text-[10px] gap-1" onClick={() => {
+                            setModelName(model.name); setModelDesc(model.description); setModelChipset(model.chipset);
+                            setEditModel(model);
                           }}>
-                            <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleVersionBuild(build)}>
-                            <GitBranch className="w-3.5 h-3.5 mr-2" /> New Version
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => exportBuild(build)}>
-                            <Download className="w-3.5 h-3.5 mr-2" /> Export
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteBuild(build)}>
-                            <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    <div className="flex items-center gap-2 mt-2 text-[10px] text-muted-foreground">
-                      <span>{build.modules.length} module{build.modules.length !== 1 ? 's' : ''}</span>
-                      <span>·</span>
-                      <span>{new Date(build.updatedAt).toLocaleDateString()}</span>
-                      {build.parentBuildId && (
-                        <>
-                          <span>·</span>
-                          <GitBranch className="w-2.5 h-2.5" />
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                            <Pencil className="w-2.5 h-2.5" /> Edit
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-6 text-[10px] gap-1" onClick={() => handleCloneModel(model)}>
+                            <Copy className="w-2.5 h-2.5" /> Clone
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-6 text-[10px] gap-1 text-destructive" onClick={() => handleDeleteModel(model)}>
+                            <Trash2 className="w-2.5 h-2.5" /> Delete
+                          </Button>
+                        </div>
+
+                        <Separator />
+
+                        {/* Builds inside this model */}
+                        <div className="p-2 space-y-1.5">
+                          <div className="flex items-center justify-between px-1">
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Builds</span>
+                            <Button size="sm" variant="ghost" className="h-5 text-[10px] gap-0.5 px-1.5"
+                              onClick={() => { setBuildName(''); setBuildVersion('1.0.0'); setBuildDesc(''); setCreateBuildOpen(true); }}>
+                              <Plus className="w-2.5 h-2.5" /> New
+                            </Button>
+                          </div>
+
+                          {model.builds.length === 0 ? (
+                            <p className="text-[10px] text-muted-foreground/60 text-center py-3">No builds</p>
+                          ) : (
+                            model.builds
+                              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                              .map(build => (
+                              <div
+                                key={build.id}
+                                className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-colors text-xs ${
+                                  selectedBuildId === build.id
+                                    ? 'bg-primary/10 border border-primary/20'
+                                    : 'hover:bg-muted/50'
+                                }`}
+                                onClick={() => setSelectedBuildId(build.id)}
+                              >
+                                <GitBranch className="w-3 h-3 text-muted-foreground shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-foreground truncate">{build.name}</p>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <Badge variant="outline" className="text-[8px] h-3.5 font-mono">v{build.version}</Badge>
+                                    <Badge className={`text-[8px] h-3.5 ${BUILD_STATUS_META[build.status].color}`}>
+                                      {BUILD_STATUS_META[build.status].label}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
+                                    <Button variant="ghost" size="icon" className="h-5 w-5">
+                                      <Settings2 className="w-2.5 h-2.5" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" onClick={e => e.stopPropagation()}>
+                                    <DropdownMenuItem onClick={() => {
+                                      setBuildName(build.name); setBuildVersion(build.version); setBuildDesc(build.description);
+                                      setEditBuildOpen(build);
+                                    }}>
+                                      <Pencil className="w-3 h-3 mr-2" /> Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleVersionBuild(build)}>
+                                      <GitBranch className="w-3 h-3 mr-2" /> New Version
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => exportBuild(build)}>
+                                      <Download className="w-3 h-3 mr-2" /> Export
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteBuild(build)}>
+                                      <Trash2 className="w-3 h-3 mr-2" /> Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </CardContent>
+                  </Card>
+                </Collapsible>
               ))}
             </div>
           )}
         </div>
 
-        {/* Module area */}
+        {/* Right: Modules for selected build */}
         <div className="col-span-12 lg:col-span-8">
           {!selectedBuild ? (
             <div className="text-center py-20 border border-dashed border-border rounded-lg">
               <ChevronRight className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
-              <p className="text-sm text-muted-foreground">Select a build to manage its modules</p>
+              <p className="text-sm text-muted-foreground">
+                {!selectedModel ? 'Select an STB model to see its builds' : 'Select a build to manage its modules'}
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
+              {/* Build header */}
               <div className="flex items-center justify-between">
                 <div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                    <Tv className="w-3 h-3" /> {selectedModel?.name}
+                    <span className="text-muted-foreground/40">→</span>
+                    <GitBranch className="w-3 h-3" /> {selectedBuild.name}
+                  </div>
                   <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
                     {selectedBuild.name}
                     <Badge variant="outline" className="text-[10px] font-mono">v{selectedBuild.version}</Badge>
@@ -294,7 +425,7 @@ const ProjectDetail = () => {
                 <div className="flex items-center gap-2">
                   <Select
                     value={selectedBuild.status}
-                    onValueChange={v => store.updateBuild(project.id, selectedBuild.id, { status: v as Build['status'] })}
+                    onValueChange={v => selectedModelId && store.updateBuild(project.id, selectedModelId, selectedBuild.id, { status: v as Build['status'] })}
                   >
                     <SelectTrigger className="w-32 h-8 text-xs">
                       <SelectValue />
@@ -314,6 +445,7 @@ const ProjectDetail = () => {
 
               <Separator />
 
+              {/* Modules grid */}
               {selectedBuild.modules.length === 0 ? (
                 <div className="text-center py-16 border border-dashed border-border rounded-lg">
                   <Package className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
@@ -346,41 +478,26 @@ const ProjectDetail = () => {
                               </div>
                             </div>
                             <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
+                              <Button variant="ghost" size="icon" className="h-6 w-6"
                                 onClick={() => handleToggleModule(mod)}
-                                title={mod.enabled ? 'Disable module' : 'Enable module'}
-                              >
+                                title={mod.enabled ? 'Disable' : 'Enable'}>
                                 {mod.enabled ? <Power className="w-3 h-3 text-node-module" /> : <PowerOff className="w-3 h-3 text-muted-foreground" />}
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-destructive/60 hover:text-destructive"
-                                onClick={() => handleDeleteModule(mod)}
-                              >
+                              <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive/60 hover:text-destructive"
+                                onClick={() => handleDeleteModule(mod)}>
                                 <Trash2 className="w-3 h-3" />
                               </Button>
                             </div>
                           </div>
-
                           {mod.description && (
                             <p className="text-[11px] text-muted-foreground mb-3 line-clamp-2">{mod.description}</p>
                           )}
-
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] text-muted-foreground">
                               {mod.nodes.length} nodes · {mod.edges.length} edges
                             </span>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-7 text-xs gap-1"
-                              onClick={() => openModuleEditor(mod)}
-                              disabled={!mod.enabled}
-                            >
+                            <Button size="sm" variant="outline" className="h-7 text-xs gap-1"
+                              onClick={() => openModuleEditor(mod)} disabled={!mod.enabled}>
                               <Settings2 className="w-3 h-3" /> Configure
                             </Button>
                           </div>
@@ -395,17 +512,75 @@ const ProjectDetail = () => {
         </div>
       </div>
 
-      {/* Create Build Dialog */}
+      {/* ── Dialogs ── */}
+
+      {/* Create STB Model */}
+      <Dialog open={createModelOpen} onOpenChange={setCreateModelOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New STB Model</DialogTitle>
+            <DialogDescription>Add a new STB model to {project.name}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Model Name</Label>
+              <Input value={modelName} onChange={e => setModelName(e.target.value)} placeholder="e.g. STB-4K Ultra" className="mt-1" />
+            </div>
+            <div>
+              <Label>Chipset</Label>
+              <Input value={modelChipset} onChange={e => setModelChipset(e.target.value)} placeholder="e.g. Broadcom 72180" className="mt-1" />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea value={modelDesc} onChange={e => setModelDesc(e.target.value)} placeholder="Model description..." className="mt-1" rows={2} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateModelOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreateModel} disabled={!modelName.trim()}>Create Model</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit STB Model */}
+      <Dialog open={!!editModel} onOpenChange={v => { if (!v) setEditModel(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit STB Model</DialogTitle>
+            <DialogDescription>Update model details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Model Name</Label>
+              <Input value={modelName} onChange={e => setModelName(e.target.value)} className="mt-1" />
+            </div>
+            <div>
+              <Label>Chipset</Label>
+              <Input value={modelChipset} onChange={e => setModelChipset(e.target.value)} className="mt-1" />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea value={modelDesc} onChange={e => setModelDesc(e.target.value)} className="mt-1" rows={2} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditModel(null)}>Cancel</Button>
+            <Button onClick={handleEditModel} disabled={!modelName.trim()}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Build */}
       <Dialog open={createBuildOpen} onOpenChange={setCreateBuildOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>New Build</DialogTitle>
-            <DialogDescription>Create a new build for {project.name}</DialogDescription>
+            <DialogDescription>Create a new build for {selectedModel?.name || 'this model'}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label>Build Name</Label>
-              <Input value={buildName} onChange={e => setBuildName(e.target.value)} placeholder="e.g. Main ECU Build" className="mt-1" />
+              <Input value={buildName} onChange={e => setBuildName(e.target.value)} placeholder="e.g. Main Build" className="mt-1" />
             </div>
             <div>
               <Label>Version</Label>
@@ -423,7 +598,7 @@ const ProjectDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Build Dialog */}
+      {/* Edit Build */}
       <Dialog open={!!editBuildOpen} onOpenChange={v => { if (!v) setEditBuildOpen(null); }}>
         <DialogContent>
           <DialogHeader>
@@ -451,12 +626,12 @@ const ProjectDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Add Module Dialog */}
+      {/* Add Module */}
       <Dialog open={addModuleOpen} onOpenChange={setAddModuleOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Module</DialogTitle>
-            <DialogDescription>Add a new module to {selectedBuild?.name || 'this build'}</DialogDescription>
+            <DialogDescription>Add a module to {selectedBuild?.name || 'this build'}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
