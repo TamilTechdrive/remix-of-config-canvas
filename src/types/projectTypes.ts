@@ -9,13 +9,24 @@ export interface Project {
   status: 'active' | 'archived' | 'draft';
   createdAt: string;
   updatedAt: string;
-  builds: Build[];
+  stbModels: STBModel[];
   tags: string[];
+}
+
+export interface STBModel {
+  id: string;
+  projectId: string;
+  name: string;
+  description: string;
+  chipset: string;
+  builds: Build[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Build {
   id: string;
-  projectId: string;
+  stbModelId: string;
   name: string;
   version: string;
   description: string;
