@@ -97,6 +97,27 @@ const EditorCanvas = () => {
     }
   }, []);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+
+      if (e.key === 'Escape') {
+        setRightPanel('none');
+        setSelectedNodeId(null);
+      } else if (e.key === 'p' || e.key === 'P') {
+        if (selectedNodeId) setRightPanel((prev) => prev === 'properties' ? 'none' : 'properties');
+      } else if (e.key === 'a' || e.key === 'A') {
+        if (selectedNodeId) setRightPanel((prev) => prev === 'actions' ? 'none' : 'actions');
+      } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedNodeId && rightPanel === 'none') {
+        deleteNode(selectedNodeId);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedNodeId, rightPanel, setSelectedNodeId, deleteNode]);
+
   const graphAnalysis = useMemo(
     () => analyzeFullGraph(nodes, edges, SAMPLE_CONFIG),
     [nodes, edges]
