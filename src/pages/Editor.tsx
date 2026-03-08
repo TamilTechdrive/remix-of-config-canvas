@@ -380,6 +380,7 @@ const EditorCanvas = ({ initialNodes, initialEdges, onSave }: EditorCanvasProps)
         onExport={exportConfig}
         onImport={confirmedImport}
         onLoadSample={confirmedLoadSample}
+        onCompare={() => setCompareOpen(true)}
         nodeCount={nodes.length}
         edgeCount={edges.length}
         onCloudSave={() => {
