@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, FolderOpen, Copy, Trash2, Pencil, Search,
-  Archive, Tag, Clock, Package,
+  Archive, Tag, Clock, Package, Tv,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +35,6 @@ const Projects = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [editProject, setEditProject] = useState<Project | null>(null);
 
-  // Form state
   const [formName, setFormName] = useState('');
   const [formDesc, setFormDesc] = useState('');
   const [formTags, setFormTags] = useState('');
@@ -84,7 +83,7 @@ const Projects = () => {
   const handleDelete = async (p: Project) => {
     const ok = await confirm({
       title: 'Delete Project',
-      description: `Permanently delete "${p.name}" and all its builds? This cannot be undone.`,
+      description: `Permanently delete "${p.name}" and all its STB models, builds, and modules? This cannot be undone.`,
       confirmLabel: 'Delete',
       variant: 'destructive',
     });
@@ -94,7 +93,7 @@ const Projects = () => {
   const handleClone = async (p: Project) => {
     const ok = await confirm({
       title: 'Clone Project',
-      description: `Create a copy of "${p.name}" with all builds and modules?`,
+      description: `Create a copy of "${p.name}" with all STB models, builds, and modules?`,
       confirmLabel: 'Clone',
     });
     if (ok) store.cloneProject(p.id);
@@ -110,6 +109,8 @@ const Projects = () => {
     if (ok) store.updateProject(p.id, { status: newStatus });
   };
 
+  const totalBuilds = (p: Project) => p.stbModels.reduce((acc, s) => acc + s.builds.length, 0);
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Header */}
@@ -117,7 +118,7 @@ const Projects = () => {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Projects</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage your configuration projects, builds, and modules
+            Manage STB configuration projects, models, builds, and modules
           </p>
         </div>
         <Button onClick={openCreate} className="gap-2">
@@ -155,7 +156,7 @@ const Projects = () => {
         <div className="text-center py-20">
           <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
           <p className="text-lg font-medium text-muted-foreground">No projects yet</p>
-          <p className="text-sm text-muted-foreground/70 mt-1">Create your first project to get started</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">Create your first STB project to get started</p>
           <Button onClick={openCreate} className="mt-4 gap-2">
             <Plus className="w-4 h-4" /> Create Project
           </Button>
@@ -216,8 +217,12 @@ const Projects = () => {
 
                 <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                   <span className="flex items-center gap-1">
+                    <Tv className="w-3 h-3" />
+                    {project.stbModels.length} model{project.stbModels.length !== 1 ? 's' : ''}
+                  </span>
+                  <span className="flex items-center gap-1">
                     <Package className="w-3 h-3" />
-                    {project.builds.length} build{project.builds.length !== 1 ? 's' : ''}
+                    {totalBuilds(project)} build{totalBuilds(project) !== 1 ? 's' : ''}
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
@@ -248,12 +253,12 @@ const Projects = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>New Project</DialogTitle>
-            <DialogDescription>Create a new configuration project</DialogDescription>
+            <DialogDescription>Create a new STB configuration project</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label>Project Name</Label>
-              <Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. Automotive ECU Config" className="mt-1" />
+              <Input value={formName} onChange={e => setFormName(e.target.value)} placeholder="e.g. STB Platform 2026" className="mt-1" />
             </div>
             <div>
               <Label>Description</Label>
@@ -261,7 +266,7 @@ const Projects = () => {
             </div>
             <div>
               <Label>Tags (comma-separated)</Label>
-              <Input value={formTags} onChange={e => setFormTags(e.target.value)} placeholder="e.g. automotive, v2, tier-1" className="mt-1" />
+              <Input value={formTags} onChange={e => setFormTags(e.target.value)} placeholder="e.g. stb, dvb, iptv" className="mt-1" />
             </div>
           </div>
           <DialogFooter>

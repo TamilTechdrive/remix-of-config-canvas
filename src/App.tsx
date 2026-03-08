@@ -48,7 +48,7 @@ const App = () => (
                 <AppShell><ProjectDetail /></AppShell>
               </ProtectedRoute>
             } />
-            <Route path="/projects/:projectId/builds/:buildId/modules/:moduleId/editor" element={
+            <Route path="/projects/:projectId/models/:modelId/builds/:buildId/modules/:moduleId/editor" element={
               <ProtectedRoute>
                 <AppShell><ModuleEditor /></AppShell>
               </ProtectedRoute>

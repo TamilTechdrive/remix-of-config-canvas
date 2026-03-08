@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useProjectStore } from '@/hooks/useProjectStore';
@@ -8,13 +7,10 @@ import { MODULE_TYPE_META } from '@/types/projectTypes';
 import Editor from './Editor';
 import { toast } from 'sonner';
 
-/**
- * Wrapper around the Editor page that provides project/build/module context.
- * It loads initial nodes/edges from the module, and saves them back on demand.
- */
 const ModuleEditor = () => {
-  const { projectId, buildId, moduleId } = useParams<{
+  const { projectId, modelId, buildId, moduleId } = useParams<{
     projectId: string;
+    modelId: string;
     buildId: string;
     moduleId: string;
   }>();
@@ -22,10 +18,11 @@ const ModuleEditor = () => {
   const store = useProjectStore();
 
   const project = store.getProject(projectId || '');
-  const build = store.getBuild(projectId || '', buildId || '');
-  const mod = store.getModule(projectId || '', buildId || '', moduleId || '');
+  const model = store.getSTBModel(projectId || '', modelId || '');
+  const build = store.getBuild(projectId || '', modelId || '', buildId || '');
+  const mod = store.getModule(projectId || '', modelId || '', buildId || '', moduleId || '');
 
-  if (!project || !build || !mod) {
+  if (!project || !model || !build || !mod) {
     return (
       <div className="h-full flex items-center justify-center flex-col gap-4">
         <p className="text-muted-foreground">Module not found</p>
@@ -51,9 +48,9 @@ const ModuleEditor = () => {
           <ArrowLeft className="w-3 h-3" />
           Back
         </Button>
-        <span className="text-muted-foreground">
-          {project.name}
-        </span>
+        <span className="text-muted-foreground">{project.name}</span>
+        <span className="text-muted-foreground/40">→</span>
+        <span className="text-muted-foreground">{model.name}</span>
         <span className="text-muted-foreground/40">→</span>
         <span className="text-muted-foreground">
           {build.name} <span className="font-mono">v{build.version}</span>
@@ -64,13 +61,12 @@ const ModuleEditor = () => {
         </Badge>
       </div>
 
-      {/* The existing editor loads here with module's nodes/edges as initial data */}
       <div className="flex-1 min-h-0">
         <Editor
           initialNodes={mod.nodes}
           initialEdges={mod.edges}
           onSave={(nodes, edges) => {
-            store.saveModuleConfig(projectId!, buildId!, moduleId!, nodes, edges);
+            store.saveModuleConfig(projectId!, modelId!, buildId!, moduleId!, nodes, edges);
             toast.success('Module Saved', { description: `${mod.name} configuration saved` });
           }}
         />
