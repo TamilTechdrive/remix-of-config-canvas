@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, Settings, BarChart3, Users, Shield, User,
   LogOut, ChevronLeft, ChevronRight, Workflow, Menu, X, Bell,
-  Zap, FolderOpen,
+  Zap, FolderOpen, FileCode,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,7 @@ const navItems = [
   { to: '/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/management', icon: Settings, label: 'Management' },
   { to: '/admin', icon: Shield, label: 'Admin Panel' },
+  { to: '/parser-data', icon: FileCode, label: 'Parser Data' },
   { to: '/profile', icon: User, label: 'Profile' },
 ];
 

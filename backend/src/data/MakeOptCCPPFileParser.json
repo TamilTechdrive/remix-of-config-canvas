@@ -1,0 +1,760 @@
+{
+   "ProcessedFiles" : [
+   {
+      "FileType": 5,
+      "FName": "ndbfcm.c",
+      "FNameFull": "Samples\\eDBE\\src\\ndbfcm.c",
+      "StartTS": 1773135932.0661452,
+      "EndTS": 1773135932.585616,
+      "TimeDelta": 0.5194709300994873,
+      "InpLC": 86678,
+      "UsedLC": 86678,
+      "EmpCmtLC": 17243,
+      "MultLC": 1453,
+      "MaxLL": 266,
+      "MinLL": 2,
+      "MaxLNR": "Samples\\eDBE\\src\\ndbfcm.c:#11756",
+      "MinLNR": "Samples\\eDBE\\src\\ndbfcm.c:#620",
+      "CondIf": 2320,
+      "CondElse": 131,
+      "CondElif": 14,
+      "CondEndif": 2321,
+      "CondNestBlk": 1135,
+      "AssignDir": 0,
+      "AssignRHS": 0,
+      "DefVarCnt": 0,
+      "DefHitCnt": 15,
+      "UndefHitCnt": 1,
+      "CtlDefHitCnt": 0,
+      "MacroHitCnt": 10
+   },
+   {
+      "FileType": 5,
+      "FName": "ndbver.c",
+      "FNameFull": "Samples\\eDBE\\src\\ndbver.c",
+      "StartTS": 1773135932.585616,
+      "EndTS": 1773135932.6012897,
+      "TimeDelta": 0.01567363739013672,
+      "InpLC": 3374,
+      "UsedLC": 3374,
+      "EmpCmtLC": 704,
+      "MultLC": 43,
+      "MaxLL": 220,
+      "MinLL": 2,
+      "MaxLNR": "Samples\\eDBE\\src\\ndbver.c:#148",
+      "MinLNR": "Samples\\eDBE\\src\\ndbver.c:#152",
+      "CondIf": 36,
+      "CondElse": 1,
+      "CondElif": 0,
+      "CondEndif": 36,
+      "CondNestBlk": 1,
+      "AssignDir": 0,
+      "AssignRHS": 0,
+      "DefVarCnt": 0,
+      "DefHitCnt": 18,
+      "UndefHitCnt": 0,
+      "CtlDefHitCnt": 0,
+      "MacroHitCnt": 2
+   }
+],
+"IncludedFiles" : [
+   {
+      "IncFName": "\"ndbint.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#78"
+   },
+   {
+      "IncFName": "\"epgbldr.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#79"
+   },
+   {
+      "IncFName": "\"dbdsmcif.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#80"
+   },
+   {
+      "IncFName": "\"dbcsdif.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#81"
+   },
+   {
+      "IncFName": "\"ndbcarr.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#82"
+   },
+   {
+      "IncFName": "\"ndbver.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#83"
+   },
+   {
+      "IncFName": "\"dbinit.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#84"
+   },
+   {
+      "IncFName": "\"eitcache.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#86"
+   },
+   {
+      "IncFName": "\"sssprobe.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#90"
+   },
+   {
+      "IncFName": "\"sysprobe.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#91"
+   },
+   {
+      "IncFName": "\"ssbootsgn.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#94"
+   },
+   {
+      "IncFName": "\"ndbfcm.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#95"
+   },
+   {
+      "IncFName": "\"dbanalyzrif.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#97"
+   },
+   {
+      "IncFName": "\"appldb.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#100"
+   },
+   {
+      "IncFName": "\"nsfilter.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#101"
+   },
+   {
+      "IncFName": "\"epgmds.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#102"
+   },
+   {
+      "IncFName": "\"sssndb.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#103"
+   },
+   {
+      "IncFName": "\"navdvbif.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#104"
+   },
+   {
+      "IncFName": "\"dbsearch.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#105"
+   },
+   {
+      "IncFName": "\"edrvdbg.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#106"
+   },
+   {
+      "IncFName": "\"ndbclm.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#109"
+   },
+   {
+      "IncFName": "\"dbfreesat.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbfcm.c:#112"
+   },
+   {
+      "IncFName": "\"ndbint.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbver.c:#63"
+   },
+   {
+      "IncFName": "\"dbdsmcif.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbver.c:#64"
+   },
+   {
+      "IncFName": "\"sssprobe.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbver.c:#66"
+   },
+   {
+      "IncFName": "\"sysprobe.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbver.c:#67"
+   },
+   {
+      "IncFName": "\"ndbver.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbver.c:#69"
+   },
+   {
+      "IncFName": "\"navdvbif.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbver.c:#70"
+   },
+   {
+      "IncFName": "\"nsfilter.h\"",
+      "SrcLineRef": "Samples\\eDBE\\src\\ndbver.c:#71"
+   }
+],
+"DefineVars" : {
+   "eDBE_THIS_SOURCE_FILE_NAME_REF" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#127"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "NDBFCM_BUILD_NO" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#137"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "NDBFCM_BUILD_DATE" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#138"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DBASE_BUILDER_TASK_NAME" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#144"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DBASE_DUMMY_BUILDER_TASK_NAME" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#145"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "LOCK_DYNAMIC_SERVICE_UPDATE_ACCESS" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#149"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "RELEASE_DYNAMIC_SERVICE_UPDATE_ACCESS" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#150"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "eDBE_DBL_LOCK_BINARY_SEM_TRACE_COUNT" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#153",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "ifdef",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#152"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "SS_eDBE_FCM_LOCK_CHECK" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#233"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "SS_eDBE_FCM_RELEASE_CHECK" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#238"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "INIT_DVB_ANALYZER_SEMAPHORE" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#243",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#239"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "LOCK_DVB_ANALYZER_ACCESS" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#245",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#239"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "RELEASE_DVB_ANALYZER_ACCESS" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#247",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#239"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "SIZE_OF_SS_DVB_PID_INFO_STRUCT" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#257",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#239"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DVB_ANALYZER_EVENT_ID" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#259",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#239"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DVB_ANALYZER_UPARAM_01" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#261",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#239"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DVB_ANALYZER_UPARAM_02" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#263",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#239"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DVB_ANALYZER_UPARAM_03" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#265",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#239"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DVB_ANALYZER_UPARAM_04" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#267",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#239"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DVB_ANALYZER_UPARAM_05" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#269",
+         "CondOrd" : {
+            "OrdDepth": 1,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#239"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DVB_ANALYZER_FILE_NAME" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#274",
+         "CondOrd" : {
+            "OrdDepth": 2,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#272"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DVB_ANALYZER_LINE" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#276",
+         "CondOrd" : {
+            "OrdDepth": 2,
+            "CondDir": "if",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#272"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "LOCK_ASL_ACCESS" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#321"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "RELEASE_ASL_ACCESS" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#322"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "NETWORK_NAME_LENGTH" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#15941",
+         "CondOrd" : {
+            "OrdDepth": 2,
+            "CondDir": "ifdef",
+            "CondSLNR": "Samples\\eDBE\\src\\ndbfcm.c:#15939"
+         }
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "NDBVER_BUILD_NO" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbver.c:#75"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "NDBVER_BUILD_DATE" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbver.c:#76"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "VER_BUILDER_TASK_NAME" : {
+      "1stHitInfo" : {
+         "VarType": "DEFINITION",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbver.c:#82"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "INIT_VERSION_MUTEX" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbver.c:#113"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   },
+   "DELETE_VERSION_MUTEX" : {
+      "1stHitInfo" : {
+         "VarType": "MACRO",
+         "HitSrcScope": "DEF-LHS",
+         "HitSLNR": "Samples\\eDBE\\src\\ndbver.c:#114"
+      },
+      "AllHitInfo" : [
+      ],
+      "ParList" : [
+      ],
+      "SibList" : [
+      ],
+      "ChList" : [
+      ],
+      "ValEntries" : {
+      }
+   }
+}
+}

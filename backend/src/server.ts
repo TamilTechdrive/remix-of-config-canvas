@@ -15,6 +15,7 @@ import userRoutes from './routes/user.routes.js';
 import configRoutes from './routes/config.routes.js';
 import configDataRoutes from './routes/configData.routes.js';
 import auditRoutes from './routes/audit.routes.js';
+import parserRoutes from './routes/parser.routes.js';
 
 const app = express();
 
@@ -122,6 +123,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/configurations', doubleCsrfProtection, configRoutes);
 app.use('/api/config-data', configDataRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/parser', parserRoutes);
 
 // ===== HEALTH CHECK =====
 app.get('/api/health', async (_req, res) => {

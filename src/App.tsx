@@ -19,6 +19,7 @@ import Analytics from "./pages/Analytics";
 import Management from "./pages/Management";
 import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
+import ParserData from "./pages/ParserData";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -77,6 +78,11 @@ const AppContent = () => {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <AppShell><Profile /></AppShell>
+              </ProtectedRoute>
+            } />
+            <Route path="/parser-data" element={
+              <ProtectedRoute>
+                <AppShell><ParserData /></AppShell>
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
