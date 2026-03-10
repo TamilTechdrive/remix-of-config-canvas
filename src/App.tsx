@@ -19,6 +19,7 @@ import Analytics from "./pages/Analytics";
 import Management from "./pages/Management";
 import AdminPanel from "./pages/AdminPanel";
 import Profile from "./pages/Profile";
+import ParserData from "./pages/ParserData";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
