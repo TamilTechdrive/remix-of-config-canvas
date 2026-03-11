@@ -37,6 +37,7 @@ const parserApi = {
 };
 
 export default function ParserData() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [sessionName, setSessionName] = useState('');
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
