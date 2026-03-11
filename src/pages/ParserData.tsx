@@ -243,7 +243,10 @@ export default function ParserData() {
               <CardTitle className="text-lg flex items-center gap-2">
                 <Eye className="h-5 w-5" /> Session Data
               </CardTitle>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                <Button size="sm" onClick={() => navigate(`/editor?parserSession=${selectedSession}`)}>
+                  <ExternalLink className="h-4 w-4 mr-1" /> Open in Config Editor
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => handleExport('summary')}>
                   <FileSpreadsheet className="h-4 w-4 mr-1" /> Summary
                 </Button>
