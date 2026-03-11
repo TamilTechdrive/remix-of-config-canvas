@@ -9,12 +9,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import {
   Upload, Database, FileCode, FileText, Download, Trash2, ChevronDown, ChevronRight,
   Layers, GitBranch, Hash, Eye, Loader2, RefreshCw, FileSpreadsheet, ExternalLink,
+  Save, FolderPlus, Plus,
 } from 'lucide-react';
-import api from '@/services/api';
+import api, { projectApi } from '@/services/api';
+import { sessionDetailToRawConfig } from '@/data/parserToConfig';
+import { parseConfigToFlow } from '@/data/configParser';
 
 interface ParserSession {
   id: string;
@@ -43,6 +49,8 @@ export default function ParserData() {
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [uploadedJson, setUploadedJson] = useState<any>(null);
   const [fileName, setFileName] = useState('');
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [saveSessionId, setSaveSessionId] = useState<string | null>(null);
 
   const { data: sessions, isLoading: loadingSessions } = useQuery({
     queryKey: ['parser-sessions'],
@@ -113,6 +121,11 @@ export default function ParserData() {
     } catch {
       toast.error('Export failed');
     }
+  };
+
+  const openSaveDialog = (sessionId: string) => {
+    setSaveSessionId(sessionId);
+    setSaveDialogOpen(true);
   };
 
   return (
@@ -219,9 +232,20 @@ export default function ParserData() {
                         e.stopPropagation();
                         navigate(`/editor?parserSession=${s.id}`);
                       }}
-                      title="Load in Config Editor"
+                      title="Preview in Config Editor"
                     >
-                      <ExternalLink className="h-4 w-4 mr-1" /> Editor
+                      <ExternalLink className="h-4 w-4 mr-1" /> Preview
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openSaveDialog(s.id);
+                      }}
+                      title="Save to Project/Build"
+                    >
+                      <Save className="h-4 w-4 mr-1" /> Save to Build
                     </Button>
                     <span className="text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</span>
                     <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(s.id); }}>
@@ -245,7 +269,10 @@ export default function ParserData() {
               </CardTitle>
               <div className="flex gap-2 flex-wrap">
                 <Button size="sm" onClick={() => navigate(`/editor?parserSession=${selectedSession}`)}>
-                  <ExternalLink className="h-4 w-4 mr-1" /> Open in Config Editor
+                  <ExternalLink className="h-4 w-4 mr-1" /> Preview in Editor
+                </Button>
+                <Button size="sm" variant="default" onClick={() => openSaveDialog(selectedSession)}>
+                  <Save className="h-4 w-4 mr-1" /> Save to Build
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => handleExport('summary')}>
                   <FileSpreadsheet className="h-4 w-4 mr-1" /> Summary
@@ -351,10 +378,256 @@ export default function ParserData() {
           </CardContent>
         </Card>
       )}
+
+      {/* Save to Project Dialog */}
+      <SaveToProjectDialog
+        open={saveDialogOpen}
+        onOpenChange={setSaveDialogOpen}
+        parserSessionId={saveSessionId}
+        onSaved={(configId) => {
+          toast.success('Config saved to build!');
+          navigate(`/editor?configId=${configId}`);
+        }}
+      />
     </div>
   );
 }
 
+// ── Save to Project/Build Dialog ──
+function SaveToProjectDialog({
+  open,
+  onOpenChange,
+  parserSessionId,
+  onSaved,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  parserSessionId: string | null;
+  onSaved: (configId: string) => void;
+}) {
+  const queryClient = useQueryClient();
+  const [selectedProject, setSelectedProject] = useState<string>('');
+  const [selectedModel, setSelectedModel] = useState<string>('');
+  const [selectedBuild, setSelectedBuild] = useState<string>('');
+  const [configName, setConfigName] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Quick-create fields
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newModelName, setNewModelName] = useState('');
+  const [newModelChipset, setNewModelChipset] = useState('');
+  const [newBuildName, setNewBuildName] = useState('');
+  const [creatingProject, setCreatingProject] = useState(false);
+  const [creatingModel, setCreatingModel] = useState(false);
+  const [creatingBuild, setCreatingBuild] = useState(false);
+
+  const { data: projects } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => (await projectApi.list()).data,
+    enabled: open,
+  });
+
+  const { data: projectDetail } = useQuery({
+    queryKey: ['project-detail', selectedProject],
+    queryFn: async () => (await projectApi.get(selectedProject)).data,
+    enabled: !!selectedProject,
+  });
+
+  const stbModels = projectDetail?.stbModels || [];
+  const selectedModelData = stbModels.find((m: any) => m.id === selectedModel);
+  const builds = selectedModelData?.builds || [];
+
+  const handleCreateProject = async () => {
+    if (!newProjectName.trim()) return;
+    setCreatingProject(true);
+    try {
+      const res = await projectApi.create({ name: newProjectName });
+      setSelectedProject(res.data.id);
+      setNewProjectName('');
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      toast.success('Project created');
+    } catch { toast.error('Failed to create project'); }
+    setCreatingProject(false);
+  };
+
+  const handleCreateModel = async () => {
+    if (!newModelName.trim() || !selectedProject) return;
+    setCreatingModel(true);
+    try {
+      const res = await projectApi.createSTBModel(selectedProject, { name: newModelName, chipset: newModelChipset || undefined });
+      setSelectedModel(res.data.id);
+      setNewModelName('');
+      setNewModelChipset('');
+      queryClient.invalidateQueries({ queryKey: ['project-detail', selectedProject] });
+      toast.success('STB Model created');
+    } catch { toast.error('Failed to create STB model'); }
+    setCreatingModel(false);
+  };
+
+  const handleCreateBuild = async () => {
+    if (!newBuildName.trim() || !selectedModel) return;
+    setCreatingBuild(true);
+    try {
+      const res = await projectApi.createBuild(selectedModel, { name: newBuildName });
+      setSelectedBuild(res.data.id);
+      setNewBuildName('');
+      queryClient.invalidateQueries({ queryKey: ['project-detail', selectedProject] });
+      toast.success('Build created');
+    } catch { toast.error('Failed to create build'); }
+    setCreatingBuild(false);
+  };
+
+  const handleSave = async () => {
+    if (!selectedBuild || !parserSessionId) return;
+    setSaving(true);
+    try {
+      // 1. Load parser session detail
+      const sessionRes = await api.get(`/parser/sessions/${parserSessionId}`);
+      // 2. Convert to RawConfig
+      const rawConfig = sessionDetailToRawConfig(sessionRes.data);
+      // 3. Convert to flow nodes/edges
+      const { nodes, edges } = parseConfigToFlow(rawConfig);
+      // 4. Save to build
+      const res = await projectApi.saveParserConfig(selectedBuild, {
+        parserSessionId,
+        configName: configName || `Parser Config ${new Date().toLocaleString()}`,
+        nodes,
+        edges,
+      });
+      onSaved(res.data.configId);
+      onOpenChange(false);
+    } catch (err) {
+      toast.error('Failed to save config to build');
+    }
+    setSaving(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Save className="h-5 w-5 text-primary" /> Save Config to Build
+          </DialogTitle>
+          <DialogDescription>
+            Convert parser data to configuration nodes and save to a Project → STB Model → Build
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Config Name */}
+          <div className="space-y-1.5">
+            <Label>Configuration Name</Label>
+            <Input
+              placeholder="e.g., ndbfcm.c Parser Config"
+              value={configName}
+              onChange={(e) => setConfigName(e.target.value)}
+            />
+          </div>
+
+          {/* Project Selection */}
+          <div className="space-y-1.5">
+            <Label>Project</Label>
+            <div className="flex gap-2">
+              <Select value={selectedProject} onValueChange={(v) => { setSelectedProject(v); setSelectedModel(''); setSelectedBuild(''); }}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select project..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {(projects || []).map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2 mt-1">
+              <Input
+                placeholder="New project name"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                className="flex-1 text-xs h-8"
+              />
+              <Button size="sm" variant="outline" onClick={handleCreateProject} disabled={creatingProject || !newProjectName.trim()}>
+                <Plus className="h-3 w-3 mr-1" /> Create
+              </Button>
+            </div>
+          </div>
+
+          {/* STB Model Selection */}
+          {selectedProject && (
+            <div className="space-y-1.5">
+              <Label>STB Model</Label>
+              <Select value={selectedModel} onValueChange={(v) => { setSelectedModel(v); setSelectedBuild(''); }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select STB model..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {stbModels.map((m: any) => (
+                    <SelectItem key={m.id} value={m.id}>{m.name}{m.chipset ? ` (${m.chipset})` : ''}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  placeholder="Model name"
+                  value={newModelName}
+                  onChange={(e) => setNewModelName(e.target.value)}
+                  className="flex-1 text-xs h-8"
+                />
+                <Input
+                  placeholder="Chipset"
+                  value={newModelChipset}
+                  onChange={(e) => setNewModelChipset(e.target.value)}
+                  className="w-28 text-xs h-8"
+                />
+                <Button size="sm" variant="outline" onClick={handleCreateModel} disabled={creatingModel || !newModelName.trim()}>
+                  <Plus className="h-3 w-3 mr-1" /> Create
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Build Selection */}
+          {selectedModel && (
+            <div className="space-y-1.5">
+              <Label>Build</Label>
+              <Select value={selectedBuild} onValueChange={setSelectedBuild}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select build..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {builds.map((b: any) => (
+                    <SelectItem key={b.id} value={b.id}>{b.name} ({b.version})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2 mt-1">
+                <Input
+                  placeholder="Build name"
+                  value={newBuildName}
+                  onChange={(e) => setNewBuildName(e.target.value)}
+                  className="flex-1 text-xs h-8"
+                />
+                <Button size="sm" variant="outline" onClick={handleCreateBuild} disabled={creatingBuild || !newBuildName.trim()}>
+                  <Plus className="h-3 w-3 mr-1" /> Create
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving || !selectedBuild}>
+            {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Saving...</> : <><Save className="h-4 w-4 mr-2" /> Save & Open Editor</>}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── DefineVar row component ──
 function DefineVarRow({ dv }: { dv: any }) {
   const [open, setOpen] = useState(false);
 
@@ -389,7 +662,6 @@ function DefineVarRow({ dv }: { dv: any }) {
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="ml-6 pl-4 border-l border-border space-y-2 py-2">
-          {/* Scope & Conditional Info */}
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div><span className="text-muted-foreground">Scope:</span> <span className="text-foreground">{dv.first_hit_src_scope}</span></div>
             <div><span className="text-muted-foreground">Source Ref:</span> <span className="font-mono text-foreground">{dv.first_hit_slnr}</span></div>
@@ -401,7 +673,6 @@ function DefineVarRow({ dv }: { dv: any }) {
             )}
           </div>
 
-          {/* Relations */}
           {(dv.parents?.length > 0 || dv.siblings?.length > 0 || dv.children?.length > 0) && (
             <div className="space-y-1">
               <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
@@ -428,7 +699,6 @@ function DefineVarRow({ dv }: { dv: any }) {
             </div>
           )}
 
-          {/* All Hits */}
           {dv.allHits?.length > 0 && (
             <div>
               <p className="text-xs font-medium text-muted-foreground">All Hits ({dv.allHits.length})</p>
